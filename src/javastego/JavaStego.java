@@ -25,12 +25,12 @@ public class JavaStego {
     
     BufferedImage buf;
     
-    public static void main(String[] args) {
+  /*  public static void main(String[] args) {
         String in = "kuda.bmp";
         String ou = "kudy.bmp";
         JavaStego js = new JavaStego(in);
         js.Export(ou);
-    }
+    }*/
     
     public JavaStego() {
         buf = null;
