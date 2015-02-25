@@ -6,6 +6,7 @@
 package javastego;
 
 import java.awt.image.BufferedImage;
+import static java.awt.image.BufferedImage.TYPE_INT_RGB;
 import java.io.File;
 import java.io.IOException;
 import java.util.logging.Level;
@@ -23,38 +24,69 @@ public class JavaStego {
      * @param args the command line arguments
      */
     
-    BufferedImage buf;
+    //BufferedImage buf;
+    int[][] MatPixel;
+    int height;
+    int width;
     
     public static void main(String[] args) {
-        String in = "kuda.bmp";
-        String ou = "kudy.bmp";
+        String in = "baboon.bmp";
+        String ou = "babun.bmp";
         JavaStego js = new JavaStego(in);
+        System.out.println(js.height+" "+js.width);
         js.Export(ou);
     }
     
     public JavaStego() {
-        buf = null;
+        //buf = null;
+        MatPixel = new int[0][0];
     }
     
     public JavaStego(String filename) {
+        BufferedImage buf = null;
         File f = new File(filename);
         try {
             buf = BMPDecoder.read(f);
         } catch (IOException ex) {
             Logger.getLogger(JavaStego.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        height = buf.getHeight();
+        width = buf.getWidth();
+        MatPixel = new int[height][width];
+        for(int i=0; i<height; i++) {
+            for(int j=0; j<height; j++) {
+                MatPixel[i][j] = buf.getRGB(i,j);
+            }
         }
     }
     
     public void Import(String filename) {
+        BufferedImage buf = null;
         File f = new File(filename);
         try {
             buf = BMPDecoder.read(f);
         } catch (IOException ex) {
             Logger.getLogger(JavaStego.class.getName()).log(Level.SEVERE, null, ex);
         }
+        height = buf.getHeight();
+        width = buf.getWidth();
+        MatPixel = new int[height][width];
+        for(int i=0; i<height; i++) {
+            for(int j=0; j<height; j++) {
+                MatPixel[i][j] = buf.getRGB(i,j);               
+            }
+        }
     }
     
     public void Export(String filename) {
+        BufferedImage buf = new BufferedImage(height,width,TYPE_INT_RGB);
+        int px;
+        for(int i=0; i<height; i++) {
+            for(int j=0; j<height; j++) {
+                px = MatPixel[i][j];
+                buf.setRGB(i,j,px);               
+            }
+        }
         File f = new File(filename);
         try {
             BMPEncoder.write(buf, f);
