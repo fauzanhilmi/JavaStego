@@ -32,8 +32,9 @@ public class JavaStego {
     public static void main(String[] args) {
         String in = "baboon.bmp";
         String ou = "babun.bmp";
+        
         JavaStego js = new JavaStego(in);
-        System.out.println(js.height+" "+js.width);
+        js.iseng();
         js.Export(ou);
     }
     
@@ -56,6 +57,27 @@ public class JavaStego {
         for(int i=0; i<height; i++) {
             for(int j=0; j<height; j++) {
                 MatPixel[i][j] = buf.getRGB(i,j);
+            }
+        }
+    }
+    
+    public void iseng() {
+        int temp[][] = new int[height][width];
+        for(int i=0; i<height; i++) {
+            for(int j=0; j<height; j++) {
+                temp[i][j] = MatPixel[i][j];
+            }
+        }
+        
+        for(int i=0; i<height; i++) {
+            for(int j=0; j<height; j++) {
+                MatPixel[i][j] &= ~1;
+            }
+        }
+        
+        for(int i=0; i<height; i++) {
+            for(int j=0; j<height; j++) {
+                System.out.println(MatPixel[i][j]+" "+temp[i][j]);
             }
         }
     }
@@ -86,7 +108,8 @@ public class JavaStego {
                 px = MatPixel[i][j];
                 buf.setRGB(i,j,px);               
             }
-        }
+        }        
+        
         File f = new File(filename);
         try {
             BMPEncoder.write(buf, f);
