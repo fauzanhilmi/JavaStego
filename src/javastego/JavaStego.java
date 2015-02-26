@@ -29,13 +29,13 @@ public class JavaStego {
     int height;
     int width;
     
-    public static void main(String[] args) {
+   /* public static void main(String[] args) {
         String in = "baboon.bmp";
         String ou = "babun.bmp";
         JavaStego js = new JavaStego(in);
         System.out.println(js.height+" "+js.width);
         js.Export(ou);
-    }
+    }*/
     
     public JavaStego() {
         //buf = null;
@@ -56,6 +56,7 @@ public class JavaStego {
         for(int i=0; i<height; i++) {
             for(int j=0; j<height; j++) {
                 MatPixel[i][j] = buf.getRGB(i,j);
+                
             }
         }
     }
