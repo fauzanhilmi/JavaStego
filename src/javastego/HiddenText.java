@@ -35,12 +35,22 @@ public class HiddenText {
             byteCount++;
             bitCount = 0;
         }
+       /* if(tempbool){
+            System.out.print('1');
+        }
+        else{
+            System.out.print('0');
+        }*/
         return tempbool;
         
     }
     
     public boolean isNext(){
         return (byteCount != data.length);
+    }
+    
+    public int getLength(){
+        return data.length*8;
     }
     
     /*public static void main(String[] args) {
