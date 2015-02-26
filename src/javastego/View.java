@@ -22,7 +22,8 @@ public class View extends javax.swing.JApplet {
      * Initializes the applet View
      */
     
-      /*public static void main(String[] args) {
+
+/*      public static void main(String[] args) {
         // TODO code application logic here
         JFrame a = new JFrame();
         View n = new View();

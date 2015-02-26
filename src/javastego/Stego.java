@@ -9,6 +9,8 @@ import java.awt.image.BufferedImage;
 import static java.awt.image.BufferedImage.TYPE_INT_RGB;
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import net.sf.image4j.codec.bmp.BMPDecoder;
@@ -18,34 +20,35 @@ import net.sf.image4j.codec.bmp.BMPEncoder;
  *
  * @author USER
  */
-public class JavaStego {
+public class Stego {
 
     /**
      * @param args the command line arguments
      */
     
     //BufferedImage buf;
-    int[][] MatPixel;
+    HiddenText ht;
+    ColorStore[][] MatPixel;
     int height;
     int width;
     
-   /* public static void main(String[] args) {
+    public static void main(String[] args) {
         String in = "baboon.bmp";
         String ou = "babun.bmp";
-        
-        JavaStego js = new JavaStego(in);
-        js.iseng();
+        Stego js = new Stego(in);
+        js.readHiddenText("test.txt");
+        js.setStego();
+        System.out.println(js.height+" "+js.width);
         js.Export(ou);
-    }*/
-    
-    public JavaStego() {
-        //buf = null;
-        MatPixel = new int[0][0];
-        height = 0;
-        width = 0;
     }
     
-    public JavaStego(String filename) {
+    public Stego() {
+        //buf = null;
+        MatPixel = new ColorStore[0][0];
+        ht = new HiddenText();
+    }
+    
+    public Stego(String filename) {
         BufferedImage buf = null;
         File f = new File(filename);
         try {
@@ -55,34 +58,17 @@ public class JavaStego {
         }
         height = buf.getHeight();
         width = buf.getWidth();
-        MatPixel = new int[height][width];
-        for(int i=0; i<height; i++) {
-            for(int j=0; j<height; j++) {
-                MatPixel[i][j] = buf.getRGB(i,j);
-                
-            }
-        }
-    }
-    
-    public void iseng() {
-        int temp[][] = new int[height][width];
-        for(int i=0; i<height; i++) {
-            for(int j=0; j<height; j++) {
-                temp[i][j] = MatPixel[i][j];
-            }
-        }
+        
+        MatPixel = new ColorStore[height][width];
+        
+        
         
         for(int i=0; i<height; i++) {
-            for(int j=0; j<height; j++) {
-                MatPixel[i][j] &= ~1;
+            for(int j=0; j<width; j++) {
+                MatPixel[i][j] = new ColorStore(buf.getRGB(i,j));     
             }
         }
-        
-        for(int i=0; i<height; i++) {
-            for(int j=0; j<height; j++) {
-                System.out.println(MatPixel[i][j]+" "+temp[i][j]);
-            }
-        }
+        ht = new HiddenText();
     }
     
     public void Import(String filename) {
@@ -95,10 +81,11 @@ public class JavaStego {
         }
         height = buf.getHeight();
         width = buf.getWidth();
-        MatPixel = new int[height][width];
+        MatPixel = new ColorStore[height][width];
         for(int i=0; i<height; i++) {
-            for(int j=0; j<height; j++) {
-                MatPixel[i][j] = buf.getRGB(i,j);               
+            for(int j=0; j<width; j++) {
+                MatPixel[i][j].setColor(buf.getRGB(i,j));
+                               
             }
         }
     }
@@ -107,12 +94,11 @@ public class JavaStego {
         BufferedImage buf = new BufferedImage(height,width,TYPE_INT_RGB);
         int px;
         for(int i=0; i<height; i++) {
-            for(int j=0; j<height; j++) {
-                px = MatPixel[i][j];
+            for(int j=0; j<width; j++) {
+                px = MatPixel[i][j].getColor();
                 buf.setRGB(i,j,px);               
             }
-        }        
-        
+        }
         File f = new File(filename);
         try {
             BMPEncoder.write(buf, f);
@@ -120,4 +106,40 @@ public class JavaStego {
             Logger.getLogger(JavaStego.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
+    
+    public void readHiddenText(String filename){
+        try {
+            byte[] data = Files.readAllBytes(Paths.get(filename));
+            ht.setData(data);
+        } catch (IOException ex) {
+            Logger.getLogger(Stego.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+    
+    public void setStego(){
+        for(int i=0; i<height&&ht.isNext(); i++) {
+            for(int j=0; j<width&&ht.isNext(); j++) {
+                if(ht.isNext()){
+                    MatPixel[i][j].setLSBRed(ht.getNextBit());
+                }
+                if(ht.isNext()){
+                    MatPixel[i][j].setLSBGreen(ht.getNextBit());
+                }
+                if(ht.isNext()){
+                    MatPixel[i][j].setLSBBlue(ht.getNextBit());
+                }
+            }
+        }
+    }
+    
+    public String getStego(){
+        for(int i=0; i<height; i++) {
+            for(int j=0; j<width; j++) {
+                
+            }
+        }
+        String a = "";
+        return a;
+    }
+    
 }
