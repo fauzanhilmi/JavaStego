@@ -35,7 +35,7 @@ public class ColorStore {
             color = color | a;
         }
         else{
-            int a = ~(1 << 16);
+        int a=0xFFFEFFFF;
             color = color & a;
         }
     }
@@ -46,7 +46,9 @@ public class ColorStore {
             color = color | a;
         }
         else{
-            int a = ~(1 << 8);
+
+        int a=0xFFFFFEFF;
+
             color = color & a;
         }
     }
@@ -57,7 +59,7 @@ public class ColorStore {
             color = color | a;
         }
         else{
-            int a = 0;
+        int a=0xFFFFFFFE;
             color = color & a;
         }
     }

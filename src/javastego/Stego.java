@@ -11,6 +11,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.Random;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import net.sf.image4j.codec.bmp.BMPDecoder;
@@ -31,6 +32,7 @@ public class Stego {
     ColorStore[][] MatPixel;
     int height;
     int width;
+    int key;
     
     public static void main(String[] args) {
         String in = "baboon.bmp";
@@ -39,6 +41,14 @@ public class Stego {
         js.readHiddenText("test.txt");
         js.setStego();
         System.out.println(js.height+" "+js.width);
+        
+        js.readHiddenText("test.txt");
+        js.setKey(10);
+        js.setStego();
+        Stego jb = new Stego(ou);
+        jb.setKey(10);
+        
+        System.out.println(jb.getStego());
         js.Export(ou);
     }
     
@@ -117,7 +127,8 @@ public class Stego {
     }
     
     public void setStego(){
-        for(int i=0; i<height&&ht.isNext(); i++) {
+        int i;
+        for(i=0; i<height&&ht.isNext(); i++) {
             for(int j=0; j<width&&ht.isNext(); j++) {
                 if(ht.isNext()){
                     MatPixel[i][j].setLSBRed(ht.getNextBit());
@@ -129,17 +140,139 @@ public class Stego {
                     MatPixel[i][j].setLSBBlue(ht.getNextBit());
                 }
             }
-        }
-    }
-    
-    public String getStego(){
-        for(int i=0; i<height; i++) {
-            for(int j=0; j<width; j++) {
-                
+        Random rand = new Random(key);
+        String s = Integer.toBinaryString(ht.getLength());
+        
+        for(i=0;i<64-s.length();i++){
+        //    System.out.println(i);
+            int randtemp = rand.nextInt(height*width);
+            int x = randtemp / height;
+            int y = randtemp % height;
+           
+            if(i%3==0){
+                MatPixel[x][y].setLSBRed(false);
+            }
+            else if(i%3==1){
+                MatPixel[x][y].setLSBGreen(false);
+            }
+            else{
+                MatPixel[x][y].setLSBBlue(false);
             }
         }
-        String a = "";
-        return a;
+        for(i=64-s.length();i<64;i++){
+            int randtemp = rand.nextInt(height*width);
+            int x = randtemp / height;
+            int y = randtemp % height;
+            if(i%3==0){
+                MatPixel[x][y].setLSBRed(s.charAt(i+s.length()-64)=='1');
+            }
+            else if(i%3==1){
+                MatPixel[x][y].setLSBGreen(s.charAt(i+s.length()-64)=='1');
+            }
+            else{
+                MatPixel[x][y].setLSBBlue(s.charAt(i+s.length()-64)=='1');
+            }
+        }
+        int count = 0;
+        while(ht.isNext()){
+            
+            
+            int randtemp = rand.nextInt(height*width);
+             
+            int x = randtemp / height;
+            int y = randtemp % height;
+            if(count%3==0){
+                MatPixel[x][y].setLSBRed(ht.getNextBit());
+                
+            }
+            else if(count%3==1){
+                MatPixel[x][y].setLSBGreen(ht.getNextBit());
+                
+            }
+            else{
+                MatPixel[x][y].setLSBBlue(ht.getNextBit());
+               
+            }
+            count++;
+            i++;
+        }
+    }
     }
     
+    public String getStego(){    
+        Random rand = new Random(key);
+        int i;
+        int n = 0;
+        int temp;
+        for(i=0;i<64;i++){
+            n = n << 1;
+            int randtemp = rand.nextInt(height*width);
+            int x = randtemp / height;
+            int y = randtemp % height;
+            if(i%3==0){
+                if(MatPixel[x][y].getLSBRed()){
+                    n += 1;
+                }
+                 
+                
+                
+            }
+            else if(i%3==1){
+                if(MatPixel[x][y].getLSBGreen()){
+                    n += 1;      
+                }
+                 
+            }
+            else{
+                if(MatPixel[x][y].getLSBBlue()){
+                    n += 1;
+                }
+             
+                    
+            }
+        //    System.out.println(n);
+        }
+        System.out.println(n);
+        int charCount = 0;
+        int tempChar = 0;
+        String ret = "";
+        for(i=0;i<n;i++){
+            
+            
+            tempChar = tempChar<<1  ;
+            int randtemp = rand.nextInt(height*width);
+            int x = randtemp / height;
+            int y = randtemp % height;
+            //if(i==0 || i==1) System.out.println(randtemp);
+            if(i%3==0){
+                if(MatPixel[x][y].getLSBRed()){
+                    tempChar += 1;
+                }
+                
+            }
+            else if(i%3==1){
+                if(MatPixel[x][y].getLSBGreen()){
+                    tempChar += 1;
+                }
+            }
+            else{
+                if(MatPixel[x][y].getLSBBlue()){
+                    tempChar += 1;  
+                }
+            }
+            charCount++;
+            
+            if(charCount == 8 ){
+                 char a = (char) tempChar;
+                charCount = 0;
+                ret+=a;
+                tempChar = 0;
+            }
+        }
+        return ret;
+    }
+    
+    public void setKey(int k){
+        key = k;
+    }
 }
