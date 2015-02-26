@@ -39,4 +39,19 @@ public class HiddenText {
         return (byteCount != data.length);
     }
     
+    /*public static void main(String[] args) {
+        byte[] data = new byte[2];
+        data[0] = (byte) 0xaf;
+        data[1] = 0x5;
+        HiddenText ht = new HiddenText(data);
+        while(ht.isNext()){
+            if(ht.getNextBit()){
+                System.out.print('1');
+            }
+            else{
+                System.out.print('0');
+            }
+        }
+        
+    }*/
 }
