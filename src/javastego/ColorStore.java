@@ -1,3 +1,5 @@
+package javastego;
+
 /*
  * To change this license header, choose License Headers in Project Properties.
  * To change this template file, choose Tools | Templates
@@ -12,7 +14,7 @@ public class ColorStore {
     private int color;
     
     public ColorStore(){
-    
+        color = 0;
     }
     
     public ColorStore(int temp){

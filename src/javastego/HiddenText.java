@@ -22,6 +22,10 @@ public class HiddenText {
         data=_data;
     }
     
+    public void setData(byte[] _data){
+        data=_data;
+    }
+    
     public boolean getNextBit(){
         
         byte temp = data[byteCount];
