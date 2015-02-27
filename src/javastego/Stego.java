@@ -38,6 +38,9 @@ public class Stego {
         String in = "baboon.bmp";
         String ou = "babun.bmp";
         Stego js = new Stego(in);
+        js.readHiddenText("test.txt");
+        js.setStego();
+        System.out.println(js.height+" "+js.width);
         
         js.readHiddenText("test.txt");
         js.setKey(10);
@@ -124,10 +127,22 @@ public class Stego {
     }
     
     public void setStego(){
+        int i;
+        for(i=0; i<height&&ht.isNext(); i++) {
+            for(int j=0; j<width&&ht.isNext(); j++) {
+                if(ht.isNext()){
+                    MatPixel[i][j].setLSBRed(ht.getNextBit());
+                }
+                if(ht.isNext()){
+                    MatPixel[i][j].setLSBGreen(ht.getNextBit());
+                }
+                if(ht.isNext()){
+                    MatPixel[i][j].setLSBBlue(ht.getNextBit());
+                }
+            }
         Random rand = new Random(key);
         String s = Integer.toBinaryString(ht.getLength());
         
-        int i;
         for(i=0;i<64-s.length();i++){
         //    System.out.println(i);
             int randtemp = rand.nextInt(height*width);
@@ -182,8 +197,9 @@ public class Stego {
             i++;
         }
     }
+    }
     
-    public String getStego(){
+    public String getStego(){    
         Random rand = new Random(key);
         int i;
         int n = 0;

@@ -1,5 +1,14 @@
+<<<<<<< HEAD
 Siapa kamu ya??
 kamu mau kemana?
 gila kamu?
 jangan dengerin si badrun,
 mukanya kayak babi
+=======
+<<<<<<< HEAD
+abcdefg
+=======
+ABCDEFG
+ASDASD
+>>>>>>> 3e1e2ea7526079de191e9e50d89a9c42a0ffa601
+>>>>>>> 5460b0c244bcf91f3831a141bf14851aebf1a926
