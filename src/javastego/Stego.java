@@ -34,7 +34,7 @@ public class Stego {
     int width;
     int key;
     
-    public static void main(String[] args) {
+    /*public static void main(String[] args) {
         String in = "baboon.bmp";
         String ou = "babun.bmp";
         Stego js = new Stego(in);
@@ -50,7 +50,7 @@ public class Stego {
         
         System.out.println(jb.getStego());
         js.Export(ou);
-    }
+    }*/
     
     public Stego() {
         //buf = null;

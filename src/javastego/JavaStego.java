@@ -26,42 +26,30 @@ public class JavaStego {
     
     //BufferedImage buf;
     int[][] MatPixel;
+    
+    boolean isColored; //true kalo RGB, false kalo grayscale
     int height;
     int width;
     
-   /* public static void main(String[] args) {
-        String in = "baboon.bmp";
+   public static void main(String[] args) {
+        String in = "smallflag.bmp";
         String ou = "babun.bmp";
         
         JavaStego js = new JavaStego(in);
-        js.iseng();
-        js.Export(ou);
-    }*/
+        //js.iseng();
+        //js.Export(ou);
+    }
     
     public JavaStego() {
         //buf = null;
         MatPixel = new int[0][0];
         height = 0;
         width = 0;
+        isColored = false;
     }
     
     public JavaStego(String filename) {
-        BufferedImage buf = null;
-        File f = new File(filename);
-        try {
-            buf = BMPDecoder.read(f);
-        } catch (IOException ex) {
-            Logger.getLogger(JavaStego.class.getName()).log(Level.SEVERE, null, ex);
-        }
-        height = buf.getHeight();
-        width = buf.getWidth();
-        MatPixel = new int[height][width];
-        for(int i=0; i<height; i++) {
-            for(int j=0; j<height; j++) {
-                MatPixel[i][j] = buf.getRGB(i,j);
-                
-            }
-        }
+        Import(filename);
     }
     
     public void iseng() {
@@ -85,6 +73,17 @@ public class JavaStego {
         }
     }
     
+    public int Initialize() {
+        int capacity=0;
+        for(int row=0; row<height; row+=3) {
+            for(int col=0; col<width; col+=3) {
+                int PixAr[] = new int [9];
+                //int xmin=
+            }
+        }
+        return capacity;
+    }
+    
     public void Import(String filename) {
         BufferedImage buf = null;
         File f = new File(filename);
@@ -93,6 +92,10 @@ public class JavaStego {
         } catch (IOException ex) {
             Logger.getLogger(JavaStego.class.getName()).log(Level.SEVERE, null, ex);
         }
+        if(buf.getType()==1) isColored = true;
+        else if(buf.getType()==13) isColored = false;
+        else System.out.println("Error : Filetype not recognized");
+        //System.out.println(buf.getType());
         height = buf.getHeight();
         width = buf.getWidth();
         MatPixel = new int[height][width];
