@@ -5,12 +5,15 @@
  */
 package javastego;
 
+import java.awt.Graphics;
 import java.awt.image.BufferedImage;
+import static java.awt.image.BufferedImage.TYPE_BYTE_GRAY;
 import static java.awt.image.BufferedImage.TYPE_INT_RGB;
 import java.io.File;
 import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.imageio.ImageIO;
 import net.sf.image4j.codec.bmp.BMPDecoder;
 import net.sf.image4j.codec.bmp.BMPEncoder;
 
@@ -32,12 +35,19 @@ public class JavaStego {
     int width;
     
    public static void main(String[] args) {
-        String in = "smallflag.bmp";
-        String ou = "babun.bmp";
+        String in = "lena-gray-s.bmp";
+        String ou = "tes.bmp";
         
         JavaStego js = new JavaStego(in);
+        for(int i=0; i<js.height; i++) {
+            for(int j=0; j<js.width; j++) {
+                //System.out.println(Integer.toString(js.MatPixel[i][j],2));
+                System.out.println(String.format("%8s", Integer.toBinaryString(js.MatPixel[i][j])).replace(' ', '0'));
+            }
+            System.out.println("");
+        }
         //js.iseng();
-        //js.Export(ou);
+        js.Export(ou);
     }
     
     public JavaStego() {
@@ -50,27 +60,6 @@ public class JavaStego {
     
     public JavaStego(String filename) {
         Import(filename);
-    }
-    
-    public void iseng() {
-        int temp[][] = new int[height][width];
-        for(int i=0; i<height; i++) {
-            for(int j=0; j<height; j++) {
-                temp[i][j] = MatPixel[i][j];
-            }
-        }
-        
-        for(int i=0; i<height; i++) {
-            for(int j=0; j<height; j++) {
-                MatPixel[i][j] &= ~1;
-            }
-        }
-        
-        for(int i=0; i<height; i++) {
-            for(int j=0; j<height; j++) {
-                System.out.println(MatPixel[i][j]+" "+temp[i][j]);
-            }
-        }
     }
     
     public int Initialize() {
@@ -100,17 +89,26 @@ public class JavaStego {
         width = buf.getWidth();
         MatPixel = new int[height][width];
         for(int i=0; i<height; i++) {
-            for(int j=0; j<height; j++) {
+            for(int j=0; j<width; j++) {
                 MatPixel[i][j] = buf.getRGB(i,j);               
+                    //MatPixel[i][j] = buf.getRGB(i,j)&0xFF;               
             }
-        }
+        }       
     }
     
     public void Export(String filename) {
-        BufferedImage buf = new BufferedImage(height,width,TYPE_INT_RGB);
+        BufferedImage buf = null;
+        buf = new BufferedImage(height,width,TYPE_INT_RGB);
+        /*if(isColored)
+             buf = new BufferedImage(height,width,TYPE_INT_RGB);
+        else
+        {
+            buf = new BufferedImage(height,width,TYPE_INT_RGB);
+            // buf = new BufferedImage(height,width,TYPE_BYTE_GRAY);
+        }*/
         int px;
         for(int i=0; i<height; i++) {
-            for(int j=0; j<height; j++) {
+            for(int j=0; j<width; j++) {
                 px = MatPixel[i][j];
                 buf.setRGB(i,j,px);               
             }
@@ -122,5 +120,12 @@ public class JavaStego {
         } catch (IOException ex) {
             Logger.getLogger(JavaStego.class.getName()).log(Level.SEVERE, null, ex);
         }
+        
+        /*Graphics g = buf.getGraphics();
+        try {
+            ImageIO.write(buf,"BMP", f);
+        } catch (IOException ex) {
+            Logger.getLogger(JavaStego.class.getName()).log(Level.SEVERE, null, ex);
+        }*/
     }
 }
