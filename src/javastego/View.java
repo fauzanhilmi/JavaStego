@@ -1,9 +1,14 @@
 package javastego;
 
 import java.awt.Component;
+import java.awt.image.BufferedImage;
 import java.io.File;
+import java.io.IOException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
+import net.sf.image4j.codec.bmp.BMPDecoder;
 
 /*
  * To change this license header, choose License Headers in Project Properties.
@@ -18,24 +23,19 @@ import javax.swing.JFrame;
 public class View extends javax.swing.JApplet {
     private File fileImage;
     private File fileText;
+    private Stego steIn;
+    private Stego steOut;
     /**
      * Initializes the applet View
      */
     
 
 
-/*      public static void main(String[] args) {
-        // TODO code application logic here
-        JFrame a = new JFrame();
-        View n = new View();
-        n.init();
-        a.getContentPane().add(n);
-        a.pack();
-        a.setVisible(true);
-    }*/
+     
     
     @Override
     public void init() {
+        steIn = new Stego();
         /* Set the Nimbus look and feel */
         //<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">
         /* If Nimbus (introduced in Java SE 6) is not available, stay with the default look and feel.
@@ -80,91 +80,199 @@ public class View extends javax.swing.JApplet {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
-        ButtonImg = new javax.swing.JToggleButton();
-        ButtonFile = new javax.swing.JToggleButton();
-        ButtonShow = new javax.swing.JToggleButton();
+        buttonGroup1 = new javax.swing.ButtonGroup();
+        chooseImgBut = new javax.swing.JToggleButton();
+        chooseFileBut = new javax.swing.JToggleButton();
+        runBut = new javax.swing.JButton();
+        jLabel1 = new javax.swing.JLabel();
+        keyField = new javax.swing.JTextField();
+        radSteg = new javax.swing.JRadioButton();
+        radExt = new javax.swing.JRadioButton();
+        jScrollPane1 = new javax.swing.JScrollPane();
+        jTextArea1 = new javax.swing.JTextArea();
+        jLabel2 = new javax.swing.JLabel();
+        jButton1 = new javax.swing.JButton();
 
-        ButtonImg.setText("Choose Image");
-        ButtonImg.addActionListener(new java.awt.event.ActionListener() {
+        chooseImgBut.setText("Choose Image");
+        chooseImgBut.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                ButtonImgActionPerformed(evt);
+                chooseImgButActionPerformed(evt);
             }
         });
 
-        ButtonFile.setText("Choose File");
-        ButtonFile.addActionListener(new java.awt.event.ActionListener() {
+        chooseFileBut.setText("Choose file text");
+        chooseFileBut.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                ButtonFileActionPerformed(evt);
+                chooseFileButActionPerformed(evt);
             }
         });
 
-        ButtonShow.setText("Show Image");
-        ButtonShow.addActionListener(new java.awt.event.ActionListener() {
+        runBut.setText("Run");
+        runBut.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                ButtonShowActionPerformed(evt);
+                runButActionPerformed(evt);
             }
         });
+
+        jLabel1.setText("key :");
+
+        buttonGroup1.add(radSteg);
+        radSteg.setSelected(true);
+        radSteg.setText("Steg");
+
+        buttonGroup1.add(radExt);
+        radExt.setText("Extract");
+
+        jTextArea1.setColumns(20);
+        jTextArea1.setRows(5);
+        jScrollPane1.setViewportView(jTextArea1);
+
+        jLabel2.setText("hasil ekstraksi :");
+
+        jButton1.setText("Show Image");
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
-                .addGap(130, 130, 130)
+                .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(ButtonShow)
-                    .addComponent(ButtonImg)
-                    .addGroup(layout.createSequentialGroup()
-                        .addGap(10, 10, 10)
-                        .addComponent(ButtonFile)))
-                .addContainerGap(169, Short.MAX_VALUE))
+                    .addComponent(chooseImgBut)
+                    .addComponent(chooseFileBut)
+                    .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                        .addComponent(jButton1)
+                        .addGroup(layout.createSequentialGroup()
+                            .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                .addComponent(runBut)
+                                .addGroup(layout.createSequentialGroup()
+                                    .addGap(9, 9, 9)
+                                    .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                        .addComponent(jLabel2)
+                                        .addComponent(jLabel1))
+                                    .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                    .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                        .addComponent(keyField, javax.swing.GroupLayout.PREFERRED_SIZE, 107, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                        .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))))
+                            .addGap(157, 157, 157)
+                            .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                .addComponent(radExt)
+                                .addComponent(radSteg)))))
+                .addContainerGap(31, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
-                .addGap(96, 96, 96)
-                .addComponent(ButtonImg)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(ButtonFile)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(ButtonShow)
-                .addContainerGap(118, Short.MAX_VALUE))
+                .addGap(26, 26, 26)
+                .addComponent(chooseImgBut)
+                .addGap(18, 18, 18)
+                .addComponent(chooseFileBut)
+                .addGap(24, 24, 24)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(keyField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jLabel1))
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(layout.createSequentialGroup()
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addGroup(layout.createSequentialGroup()
+                                .addGap(40, 40, 40)
+                                .addComponent(radSteg)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(radExt))
+                            .addGroup(layout.createSequentialGroup()
+                                .addGap(30, 30, 30)
+                                .addComponent(jLabel2)))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(runBut)
+                            .addComponent(jButton1))
+                        .addContainerGap())
+                    .addGroup(layout.createSequentialGroup()
+                        .addGap(30, 30, 30)
+                        .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addContainerGap(40, Short.MAX_VALUE))))
         );
     }// </editor-fold>//GEN-END:initComponents
 
-    private void ButtonImgActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_ButtonImgActionPerformed
+    private void chooseFileButActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_chooseFileButActionPerformed
         // TODO add your handling code here:
+        File file ;
         JFileChooser jc = new JFileChooser();
         int returnVal = jc.showOpenDialog((Component)evt.getSource());
         if(returnVal == JFileChooser.APPROVE_OPTION){
-            fileImage = jc.getSelectedFile();
+            file = jc.getSelectedFile();
+            steIn.readHiddenText(file.getAbsolutePath());
         }
-    }//GEN-LAST:event_ButtonImgActionPerformed
+    }//GEN-LAST:event_chooseFileButActionPerformed
 
-    private void ButtonFileActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_ButtonFileActionPerformed
+    private void chooseImgButActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_chooseImgButActionPerformed
         // TODO add your handling code here:
+        File file ;
         JFileChooser jc = new JFileChooser();
         int returnVal = jc.showOpenDialog((Component)evt.getSource());
         if(returnVal == JFileChooser.APPROVE_OPTION){
-            fileText = jc.getSelectedFile();
+            int height=0,width=0;
+            file = jc.getSelectedFile();
+            steIn.Import(file.getAbsolutePath());
+            ViewImage vi = new ViewImage();
+            vi.setFile(file);
+            JFrame a = new JFrame();
+            vi.init();
+            a.getContentPane().add(vi);
+            a.pack();
+            
+            try {
+                BufferedImage buf = BMPDecoder.read(file);
+                height = buf.getHeight();
+                width = buf.getWidth();
+            } catch (IOException ex) {
+                Logger.getLogger(JavaStego.class.getName()).log(Level.SEVERE, null, ex);
+            }
+            a.setSize(height, width);
+            a.setVisible(true);    
         }
-    }//GEN-LAST:event_ButtonFileActionPerformed
+        
+    }//GEN-LAST:event_chooseImgButActionPerformed
 
-    private void ButtonShowActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_ButtonShowActionPerformed
+    private void runButActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_runButActionPerformed
         // TODO add your handling code here:
-        JFrame a = new JFrame();
-        ViewImage n = new ViewImage();
-        n.setFile(fileImage);
-        n.init();
-        a.getContentPane().add(n);
-        a.pack();
-        a.setVisible(true);
-    }//GEN-LAST:event_ButtonShowActionPerformed
+        String skey = keyField.getText();
+        int key = 0;
+        for(int i=0;i<skey.length();i++){
+            key += (int) (skey.charAt(i));
+        }
+        steIn.setKey(key);
+        if(radSteg.isSelected()){
+            steIn.setStego();
+            steIn.Export("nyoba.bmp");
+            File file= new File("nyoba.bmp");
+            ViewImage vi = new ViewImage();
+            vi.setFile(file);
+            JFrame a = new JFrame();
+            vi.init();
+            a.getContentPane().add(vi);
+            a.pack();
+            a.setVisible(true);
+        }
+        else{
+            jTextArea1.setText(steIn.getStego());
+        }
+        
+    }//GEN-LAST:event_runButActionPerformed
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JToggleButton ButtonFile;
-    private javax.swing.JToggleButton ButtonImg;
-    private javax.swing.JToggleButton ButtonShow;
+    private javax.swing.ButtonGroup buttonGroup1;
+    private javax.swing.JToggleButton chooseFileBut;
+    private javax.swing.JToggleButton chooseImgBut;
+    private javax.swing.JButton jButton1;
+    private javax.swing.JLabel jLabel1;
+    private javax.swing.JLabel jLabel2;
+    private javax.swing.JScrollPane jScrollPane1;
+    private javax.swing.JTextArea jTextArea1;
+    private javax.swing.JTextField keyField;
+    private javax.swing.JRadioButton radExt;
+    private javax.swing.JRadioButton radSteg;
+    private javax.swing.JButton runBut;
     // End of variables declaration//GEN-END:variables
 }
