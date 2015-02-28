@@ -484,10 +484,10 @@ public class XinLiao {
         return y2;
     }
     
-    public static void main(String [] args){
+   /* public static void main(String [] args){
         int messageLength = embedMessage("yusuf", "sari", "baboon.bmp", "stego_baboon.bmp");
         System.out.println("messageLength : "+messageLength);
         System.out.println("PSNR with mode ("+mode+"): "+PSNR(false, "baboon.bmp", "stego_baboon.bmp")+" dB");
         System.out.println("message : "+extractMessage("sari", messageLength, "stego_baboon.bmp"));
-    }
+    }*/
 }
