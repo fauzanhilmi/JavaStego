@@ -62,12 +62,39 @@ public class JavaStego {
         Import(filename);
     }
     
+    int PixAr[];
     public int Initialize() {
         int capacity=0;
         for(int row=0; row<height; row+=3) {
             for(int col=0; col<width; col+=3) {
-                int PixAr[] = new int [9];
-                //int xmin=
+                if(row+3<height)
+                    PixAr = new int [9];
+                    int idx = 0;
+                    int xmin = MatPixel[row][col];
+                    for(int i=row; i<row+3; i++) {
+                        for(int j=col; j<col+3; j++) {
+                            PixAr[idx] = MatPixel[i][j];
+                            idx++;
+                            
+                            if(MatPixel[i][j]<xmin)
+                                xmin = MatPixel[i][j];
+                        }
+                    }
+                    
+                    int d = 0;
+                    for(int i=0; i<9; i++) {
+                        d += (PixAr[i]-xmin);
+                    }
+                    d /= 8;
+                    
+                    int level; //0-3
+                    if(d<=7) level = 0;
+                    else if(d>=8 && d<=15) level = 1;
+                    else if(d>=16 && d<=31) level = 2;
+                    else level = 3;
+                    
+                    //belum sisip bit tanda
+                    //belum hitung kapasitas
             }
         }
         return capacity;
