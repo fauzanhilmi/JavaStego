@@ -42,7 +42,6 @@ public class HiddenText {
             System.out.print('0');
         }*/
         return tempbool;
-        
     }
     
     public boolean isNext(){

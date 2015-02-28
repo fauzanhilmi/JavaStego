@@ -40,22 +40,7 @@ public class Stego {
     int width;
     int key;
     
-  /*  public static void main(String[] args) {
-        String in = "baboon.bmp";
-        String ou = "babun.bmp";
-        Stego js = new Stego(in);
-        
-        js.readHiddenText("test.txt");
-        js.setKey(10);
-        js.setStego();
-        js.Export(ou);
-        Stego jb = new Stego(ou);
-        jb.setKey(10);
-        
-        System.out.println(jb.getStego());
-        
-    }*/
-    
+
     public static void main(String[] args) {
         // TODO code application logic here
         JFrame a = new JFrame();
@@ -64,7 +49,7 @@ public class Stego {
         a.getContentPane().add(n);
         a.pack();
         a.setVisible(true);
-    }
+
     
     public Stego() {
         //buf = null;
