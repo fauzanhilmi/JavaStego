@@ -66,17 +66,13 @@ public class XinLiao {
                         int [] y = new int[4];
                         int [] yt = new int[4];
                         int []bitStore = new int[4];
-                        int redLSBnullifier, blueLSBnullifier, greenLSBnullifier;
+                        int nullifier;
                         
                         y[0] = buf.getRGB(i, j);
                         y[1] = buf.getRGB(i, j+1);
                         y[2] = buf.getRGB(i+1, j);
                         y[3] = buf.getRGB(i+1, j+1);
                         D = calculateD(y[0], y[1], y[2], y[3]);
-                        System.out.println("y[0] : "+Integer.toHexString(y[0]));
-                        System.out.println("y[1] : "+Integer.toHexString(y[1]));
-                        System.out.println("y[2] : "+Integer.toHexString(y[2]));
-                        System.out.println("y[3] : "+Integer.toHexString(y[3]));
                         
                         //menentukan k
                         if(D>=treshold)
@@ -90,26 +86,17 @@ public class XinLiao {
                         //menggenapkan bitString
                             if((bitString.length()%(12*k)) != 0){
                                 int sisa = 12*k - (bitString.length()%(12*k));
-                                for(int a=0; a<sisa; a++)
+                                for(int a=0; a<sisa; a++){
                                     bitString+="0";
+                                }
                             }
                             
-                        //menentukan LSBnullifier
-                        redLSBnullifier = 0xFFFFFFFF;
-                        redLSBnullifier <<= k+16;
-                        redLSBnullifier += 0xFFFF;
                         
-                        greenLSBnullifier = 0xFFFFFFFF;
-                        greenLSBnullifier <<= k+8;
-                        greenLSBnullifier += 0xFF;
-                        
-                        blueLSBnullifier = 0xFFFFFFFF;
-                        blueLSBnullifier <<= k;
-                        
-                        messageLength += bitString.length();
-                        
+                        //menentukan nullifier
+                        int nullyTemp = (0xFF<<k)&0xFF;
+                        nullifier = ((((nullyTemp<<8)+nullyTemp)<<8)+nullyTemp)+0xFF000000;
+                            
                         for(int yIdx = 0; yIdx<4; yIdx++){
-                            int temp;
                             bitStore[0] = convertStringToByte(bitString.substring(0, k));
                             bitStore[1] = convertStringToByte(bitString.substring(k, 2*k));
                             if(bitString.length()>k)
@@ -120,30 +107,17 @@ public class XinLiao {
                             if(bitString.length()>0)
                                 bitString = bitString.substring(3*k);
                             
-                            //untuk warna merah
-                            temp = 0xFFFFFFFF << k+16;
-                            bitStore[0] <<= 16;
-                            bitStore[0] += temp;
-                            bitStore[0] += 0xFFFF;
-                            
-                            //untuk warna hijau
-                            temp = 0xFFFFFFFF << k+8;
-                            bitStore[1] <<= 8;
-                            bitStore[1] += temp;
-                            bitStore[1] += 0xFF;
-                            
-                            //untuk warna biru
-                            temp = 0xFFFFFFFF << k;
-                            bitStore[2] += temp;
-                            
+                            bitStore[0]<<=16;
+                            bitStore[1]<<=8;
+                            bitStore[0] += (bitStore[1]+bitStore[2]);
+
                             //mengubah y menjadi y'
-                            yt[yIdx] = y[yIdx] & redLSBnullifier & greenLSBnullifier & blueLSBnullifier & bitStore[0] & bitStore[1] & bitStore[2];
+                            yt[yIdx] = (y[yIdx]&nullifier)+bitStore[0];
                             
                             //mengubah y' menjadi y" dengan modified LSB substitution
-                            if(isModifiable(y[yIdx])){
-                                int min, max, MSB, yTemp;
-                                
-                                //untuk warna merah
+                            int min, max, MSB, yTemp;
+                            //untuk warna merah
+                            if(isModifiable((y[yIdx]&0xFFFFFF)>>16)){
                                 MSB = 1 << k+16;
                                 min = yt[yIdx] - MSB;
                                 max = yt[yIdx] + MSB;
@@ -154,8 +128,9 @@ public class XinLiao {
                                     if(Math.abs(max - y[yIdx]) < Math.abs(yt[yIdx]-y[yIdx]))
                                         yt[yIdx] = max;
                                 }
-                                
-                                //untuk warna hijau
+                            }
+                            //untuk warna hijau
+                            if(isModifiable((y[yIdx]&0xFFFFFF)>>8)){
                                 MSB = 1 << k+8;
                                 min = yt[yIdx] - MSB;
                                 max = yt[yIdx] + MSB;
@@ -166,8 +141,9 @@ public class XinLiao {
                                     if(Math.abs(max - y[yIdx]) < Math.abs(yt[yIdx]-y[yIdx]))
                                         yt[yIdx] = max;
                                 }
-                                
-                                //untuk warna biru
+                            }
+                            //untuk warna biru
+                            if(isModifiable((y[yIdx]&0xFF))){
                                 MSB = 1 << k;
                                 min = yt[yIdx] - MSB;
                                 max = yt[yIdx] + MSB;
@@ -178,7 +154,7 @@ public class XinLiao {
                                     if(Math.abs(max - y[yIdx]) < Math.abs(yt[yIdx]-y[yIdx]))
                                         yt[yIdx] = max;
                                 }
-                            }                            
+                            }
                         }
                         
                         //mencari nilai l
@@ -206,11 +182,7 @@ public class XinLiao {
                             }
                         }
                         
-                        //memasukkan nilai MatPixel berdasarkan nilai l
-                        System.out.println("yt[0] : "+Integer.toHexString(yt[0])+ lMin*maxBit);
-                        System.out.println("yt[1] : "+Integer.toHexString(yt[1])+ lMin*maxBit);
-                        System.out.println("yt[2] : "+Integer.toHexString(yt[2])+ lMin*maxBit);
-                        System.out.println("yt[3] : "+Integer.toHexString(yt[3])+ lMin*maxBit);
+                        //memasukkan nilai berdasarkan nilai l
                         buf.setRGB(i, j, yt[0] + lMin*maxBit);
                         buf.setRGB(i, j+1, yt[1] + lMin*maxBit);
                         buf.setRGB(i+1, j, yt[2] + lMin*maxBit);
@@ -224,7 +196,7 @@ public class XinLiao {
         } catch (IOException ex) {
             Logger.getLogger(XinLiao.class.getName()).log(Level.SEVERE, null, ex);
         }
-        return (messageLength-1)/8;
+        return message.length();
     }
     
     public static String extractMessage(String key, int messageLength, String stegoImage){
@@ -245,7 +217,7 @@ public class XinLiao {
             messageLength *= 8;
             for(int i=0; i<height; i+=2){
                 for(int j=0; j<width; j+=2){
-                    if(i+1 != height && j+1 != width && messageLength!=0){
+                    if(i+1 != height && j+1 != width && messageLength>0){
                         int [] y = new int[4];
                         int [] yt = new int[4];
                         int []bitStore = new int[4];
@@ -264,19 +236,18 @@ public class XinLiao {
                         else
                             k = kHigh;
                         
-                        for(int idx=0; idx<k; idx++){
-                            getter <<= 1;
-                            getter++;
-                        }
+                        //menentukan getter
+                        int getterTemp= 0xFF>>(8-k);
+                        getter = ((((getterTemp<<8)+getterTemp)<<8)+getterTemp)+0xFF000000;
                         
                         for(int yi = 0; yi<4; yi++){
-                            int R,G,B;
+                            int R, G, B, tempHasil;
                             String temp="";
                             
-                            R = y[yi]&(getter << 16);
-                            G = y[yi]&(getter << 8);
-                            B = y[yi]&getter;
-                            System.out.println("ex-y["+yi+"] : "+Integer.toHexString(y[yi]));
+                            tempHasil = y[yi]&getter;
+                            R = (tempHasil&0xFF0000)>>16;
+                            G = (tempHasil&0xFF00)>>8;
+                            B = (tempHasil&0xFF);
                             //ambil dari warna merah
                             temp = Integer.toBinaryString(R);
                             if(temp.length() < k){
@@ -304,11 +275,10 @@ public class XinLiao {
                             }
                             bitString += temp;
                         }
-                        messageLength -= 12*k;
+                        messageLength -= (12*k);
                     }
                 }
             }
-            System.out.println(bitString);
             //mengubah bitString jadi String
             for(int i=0; i<stream.length; i++){
                 if(bitString.length() >= 8)
