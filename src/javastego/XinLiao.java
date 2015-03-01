@@ -10,6 +10,8 @@ import java.io.File;
 import java.io.IOException;
 import static java.lang.Integer.max;
 import static java.lang.Integer.min;
+import java.util.Random;
+import java.util.Scanner;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import net.sf.image4j.codec.bmp.BMPDecoder;
@@ -31,6 +33,7 @@ public class XinLiao {
     private static int kHigh = 3;
     private static int k;
     private static int mode = 3;
+    private static Scanner input = new Scanner(System.in);
     
     protected XinLiao(){
         
@@ -48,7 +51,7 @@ public class XinLiao {
         float D, D_1;
         File coverFile, stegoFile;
         BufferedImage buf;
-        int height, width = 0;
+        int height, width;
         String cipher, bitString;
         
         coverFile = new File(coverImage);
@@ -58,11 +61,39 @@ public class XinLiao {
             buf = BMPDecoder.read(coverFile);
             height = buf.getHeight();
             width = buf.getWidth();
+            
+            if(buf.getType() == BufferedImage.TYPE_BYTE_GRAY 
+                    || buf.getType() == BufferedImage.TYPE_USHORT_GRAY 
+                    || buf.getType()==BufferedImage.TYPE_BYTE_INDEXED){
+                buf.flush();
+                return embedMessageGrayScale(message, key, coverImage, stegoImage);
+            }
+            if((height*width)<(message.length()*8/kLow + 1))
+                return -1;
+            
+            //menyimpan informasi panjang pesan di akhir gambar
+            String intBitString = Integer.toBinaryString(message.length());
+            if(intBitString.length() < 32){
+                int sisa = 32 - intBitString.length();
+                for(int i=0; i< sisa; i++)
+                    intBitString = "0"+intBitString;
+            }
+            for(int j=width-16; j<width; j++){
+                int i=height-1;
+                int bitStore = convertStringToByte(intBitString.substring(0, 2));
+                if(intBitString.length()>3)
+                    intBitString = intBitString.substring(2);
+                bitStore = (bitStore<<16) + (bitStore<<8) + bitStore;
+                buf.setRGB(i, j, (buf.getRGB(i, j)&0xFFFCFCFC)+bitStore);
+            }
             cipher = encryptExtended(message, key);
             bitString = convertStringToBitString(cipher);
             for(int i=0; i<height; i+=2){
                 for(int j=0; j<width; j+=2){
                     if(i+1 != height && j+1 != width && bitString.length()!=0){
+                        //j=width-16 sampai j=width digunakan untuk menyimpan informasi panjang pesang
+                        if(i==(height-1) && j>= (width-16))
+                            break;
                         int [] y = new int[4];
                         int [] yt = new int[4];
                         int []bitStore = new int[4];
@@ -72,7 +103,7 @@ public class XinLiao {
                         y[1] = buf.getRGB(i, j+1);
                         y[2] = buf.getRGB(i+1, j);
                         y[3] = buf.getRGB(i+1, j+1);
-                        D = calculateD(y[0], y[1], y[2], y[3]);
+                        D = calculateD(y[0]&0xFFFFFF, y[1]&0xFFFFFF, y[2]&0xFFFFFF, y[3]&0xFFFFFF);
                         
                         //menentukan k
                         if(D>=treshold)
@@ -130,7 +161,7 @@ public class XinLiao {
                                 }
                             }
                             //untuk warna hijau
-                            if(isModifiable((y[yIdx]&0xFFFFFF)>>8)){
+                            if(isModifiable((y[yIdx]&0xFFFF)>>8)){
                                 MSB = 1 << k+8;
                                 min = yt[yIdx] - MSB;
                                 max = yt[yIdx] + MSB;
@@ -165,9 +196,17 @@ public class XinLiao {
                             int [] yx = new int[4];
                             
                             for(int yIdx = 0; yIdx<4; yIdx++){
-                                yx[yIdx] = yt[yIdx] + l*maxBit;
+                                int temp;
+                                int sign = 1;
+                                if(lMin == -1){
+                                    lMin = Math.abs(lMin);
+                                    sign = -1;
+                                }
+                                temp = lMin*maxBit;
+                                temp = (temp<<16) + (temp<<8) + temp;
+                                yx[yIdx] = yt[yIdx] + sign*temp;
                             }
-                            D_1 = calculateD(yx[0], yx[1], yx[2], yx[3]);
+                            D_1 = calculateD(yx[0]&0xFFFFFF, yx[1]&0xFFFFFF, yx[2]&0xFFFFFF, yx[3]&0xFFFFFF);
                             if((D>= treshold && D_1 >= treshold 
                                 || D<treshold && D_1 < treshold)
                                 && !isErrorBlock(D_1, min4(yx[0], yx[1], yx[2], yx[3]), max4(yx[0], yx[1], yx[2], yx[3]))){
@@ -183,10 +222,21 @@ public class XinLiao {
                         }
                         
                         //memasukkan nilai berdasarkan nilai l
-                        buf.setRGB(i, j, yt[0] + lMin*maxBit);
-                        buf.setRGB(i, j+1, yt[1] + lMin*maxBit);
-                        buf.setRGB(i+1, j, yt[2] + lMin*maxBit);
-                        buf.setRGB(i+1, j+1, yt[3] + lMin*maxBit);
+                        int temp;
+                        int sign = 1;
+                        if(lMin == -1){
+                            lMin = Math.abs(lMin);
+                            sign = -1;
+                        }
+                        temp = lMin*maxBit;
+                        temp = (temp<<16) + (temp<<8) + temp;
+                        buf.setRGB(i, j, yt[0] + sign*temp);
+                        buf.setRGB(i, j+1, yt[1] + sign*temp);
+                        buf.setRGB(i+1, j, yt[2] + sign*temp);
+                        buf.setRGB(i+1, j+1, yt[3] + sign*temp);
+                        
+                    }else{
+                        break;
                     }
                 }
             }
@@ -199,25 +249,222 @@ public class XinLiao {
         return message.length();
     }
     
-    public static String extractMessage(String key, int messageLength, String stegoImage){
-        String plainText="";
-         float D, D_1;
-        File stegoFile;
+    private static int embedMessageGrayScale(String message, String key, String coverImage, String stegoImage){
+         int messageLength=0;
+        float D, D_1;
+        File coverFile, stegoFile;
         BufferedImage buf;
-        int height, width = 0;
-        String bitString="";
-        String [] stream = new String[messageLength];
+        int height, width;
+        String cipher, bitString;
         
+        coverFile = new File(coverImage);
         stegoFile = new File(stegoImage);
         
+        try {
+            buf = BMPDecoder.read(coverFile);
+            height = buf.getHeight();
+            width = buf.getWidth();
+            if((height*width)<(message.length()*8/kLow + 1))
+                return -1;
+            //menyimpan informasi panjang pesan di akhir gambar
+            String intBitString = Integer.toBinaryString(message.length());
+            if(intBitString.length() < 32){
+                int sisa = 32 - intBitString.length();
+                for(int i=0; i< sisa; i++)
+                    intBitString = "0"+intBitString;
+            }
+            for(int j=width-16; j<width; j++){
+                int i=height-1;
+                int bitStore = convertStringToByte(intBitString.substring(0, 2));
+                if(intBitString.length()>3)
+                    intBitString = intBitString.substring(2);
+                bitStore = (bitStore<<16) + (bitStore<<8) + bitStore;
+                buf.setRGB(i, j, (buf.getRGB(i, j)&0xFFFCFCFC)+bitStore);
+            }
+            cipher = encryptExtended(message, key);
+            bitString = convertStringToBitString(cipher);
+            for(int i=0; i<height; i+=2){
+                for(int j=0; j<width; j+=2){
+                    if(i+1 != height && j+1 != width && bitString.length()!=0){
+                        //j=width-16 sampai j=width digunakan untuk menyimpan panjang pesan
+                        if(i==(height-1) && j>= (width-16))
+                            break;
+                        int [] y = new int[4];
+                        int [] yt = new int[4];
+                        int []bitStore = new int[4];
+                        int nullifier;
+                        
+                        y[0] = buf.getRGB(i, j)&0xFF;
+                        y[1] = buf.getRGB(i, j+1)&0xFF;
+                        y[2] = buf.getRGB(i+1, j)&0xFF;
+                        y[3] = buf.getRGB(i+1, j+1)&0xFF;
+                        D = calculateD(y[0], y[1], y[2], y[3]);
+                        
+                        //menentukan k
+                        if(D>=treshold)
+                            k = kLow;
+                        else
+                            k = kHigh;
+                        
+                        //tidak menghitung error block dengan asumsi block selalu benar
+                        //hal ini dilakukan agar treshold, kLow, dan kHigh bernilai tetap
+                        
+                        //menggenapkan bitString
+                            if((bitString.length()%(4*k)) != 0){
+                                int sisa = 4*k - (bitString.length()%(4*k));
+                                for(int a=0; a<sisa; a++){
+                                    bitString+="0";
+                                }
+                            }
+                            
+                        
+                        //menentukan nullifier
+                        nullifier = (0xFF<<k)&0xFF;
+                            
+                        for(int yIdx = 0; yIdx<4; yIdx++){
+                            bitStore[0] = convertStringToByte(bitString.substring(0, k));
+                            
+                            if(bitString.length()>0)
+                                bitString = bitString.substring(k);
+
+                            //mengubah y menjadi y'
+                            yt[yIdx] = (y[yIdx]&nullifier)+bitStore[0];
+                            
+                            //mengubah y' menjadi y" dengan modified LSB substitution
+                            int min, max, MSB, yTemp;
+                            //untuk warna merah
+                            if(isModifiable(y[yIdx])){
+                                MSB = 1 << k;
+                                min = yt[yIdx] - MSB;
+                                max = yt[yIdx] + MSB;
+                                if(Math.abs(min - y[yIdx]) < Math.abs(max - y[yIdx])){
+                                    if(Math.abs(min - y[yIdx]) < Math.abs(yt[yIdx]-y[yIdx]))
+                                        yt[yIdx] = min;
+                                }else{
+                                    if(Math.abs(max - y[yIdx]) < Math.abs(yt[yIdx]-y[yIdx]))
+                                        yt[yIdx] = max;
+                                }
+                            }
+                        }
+                        
+                        //mencari nilai l
+                        int lMin = -1;
+                        int minimized = Integer.MAX_VALUE;
+                        int maxBit = (int)(Math.pow(2, k));
+                        for(int l=-1; l<=1; l++){
+                            int [] yx = new int[4];
+                            
+                            for(int yIdx = 0; yIdx<4; yIdx++){
+                                int temp;
+                                int sign = 1;
+                                if(lMin == -1){
+                                    lMin = Math.abs(lMin);
+                                    sign = -1;
+                                }
+                                temp = lMin*maxBit;
+                                temp = (temp<<16) + (temp<<8) + temp;
+                                yx[yIdx] = yt[yIdx] + l*maxBit;
+                            }
+                            D_1 = calculateD(yx[0]&0xFF, yx[1]&0xFF, yx[2]&0xFF, yx[3]&0xFF);
+                            if((D>= treshold && D_1 >= treshold 
+                                || D<treshold && D_1 < treshold)
+                                && !isErrorBlock(D_1, min4(yx[0], yx[1], yx[2], yx[3]), max4(yx[0], yx[1], yx[2], yx[3]))){
+                                int sum=0;
+                                for(int yIdx = 0; yIdx<4; yIdx++){
+                                    sum += (yx[yIdx]-y[yIdx])*(yx[yIdx]-y[yIdx]);
+                                }
+                                if(sum < minimized){
+                                    minimized = sum;
+                                    lMin = l;
+                                }
+                            }
+                        }
+
+                        //memasukkan nilai berdasarkan nilai l
+                        int temp;
+                        temp = lMin*maxBit;
+                        
+                        yt[0] = yt[0] + temp;
+                        yt[1] = yt[1] + temp;
+                        yt[2] = yt[2] + temp;
+                        yt[3] = yt[3] + temp;
+                        
+                        yt[0] = 0xFF000000 + (yt[0]<<16) + (yt[0]<<8) + yt[0];
+                        yt[1] = 0xFF000000 + (yt[1]<<16) + (yt[1]<<8) + yt[1];
+                        yt[2] = 0xFF000000 + (yt[2]<<16) + (yt[2]<<8) + yt[2];
+                        yt[3] = 0xFF000000 + (yt[3]<<16) + (yt[3]<<8) + yt[3];
+                        
+                        buf.setRGB(i, j, yt[0]);
+                        buf.setRGB(i, j+1, yt[1]);
+                        buf.setRGB(i+1, j, yt[2]);
+                        buf.setRGB(i+1, j+1, yt[3]);
+                        
+                        
+                    }else{
+                        break;
+                    }
+                }
+            }
+            //menuliskan buf ke dalam stegoFile
+            BMPEncoder.write(buf, stegoFile);
+            buf.flush();
+        } catch (IOException ex) {
+            Logger.getLogger(XinLiao.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return message.length();
+    }
+    
+    public static String extractMessage(String key, String stegoImage){
+        String plainText="";
+        int messageLength=0;
+        float D, D_1;
+        File stegoFile;
+        BufferedImage buf;
+        int height, width;
+        String bitString="";
+        String [] stream;
+        
+        stegoFile = new File(stegoImage);
         try {
             buf = BMPDecoder.read(stegoFile);
             height = buf.getHeight();
             width = buf.getWidth();
+            //mengambil informasi panjang pesan pada akhir gambar
+            String intBitString = "";
+            for(int j=width-16; j<width; j++){
+                int i = height-1;
+                System.out.println("p"+i+j+": "+Integer.toHexString(buf.getRGB(i, j)));
+                String inttemp = Integer.toBinaryString(buf.getRGB(i, j)&0x3);
+                if(inttemp.length()<2){
+                    int sisa = 2 - inttemp.length();
+                    for(int si = 0; si<sisa; si++)
+                        inttemp = "0" + inttemp;
+                }
+                System.out.println("inttemp : "+inttemp);
+                intBitString += inttemp;
+            }
+            System.out.println("bs : "+intBitString);
+            int [] intStore = new int[4];
+            intStore[0] = ((int)convertStringToByte(intBitString.substring(0, 8)))<<24;
+            intStore[1] = ((int)convertStringToByte(intBitString.substring(8, 16)))<<16;
+            intStore[2] = ((int)convertStringToByte(intBitString.substring(16, 24)))<<8;
+            intStore[3] = ((int)convertStringToByte(intBitString.substring(24)));
+            messageLength = intStore[0] + intStore[1] + intStore[2] + intStore[3];
+            System.out.println("message length : "+messageLength);
+            stream = new String[9];
+            if(buf.getType() == BufferedImage.TYPE_BYTE_GRAY 
+                    || buf.getType() == BufferedImage.TYPE_USHORT_GRAY 
+                    || buf.getType()==BufferedImage.TYPE_BYTE_INDEXED){
+                buf.flush();
+                return extractMessageGrayScale(key, messageLength, stegoImage);
+            }
             messageLength *= 8;
-            for(int i=0; i<height; i+=2){
+            for(int i=0;i<height;i+=2){
                 for(int j=0; j<width; j+=2){
                     if(i+1 != height && j+1 != width && messageLength>0){
+                        //j=width-16 sampai j=width digunakan untuk menyimpan panjang pesan
+                        if(i==(height-1) && j>= (width-16))
+                            break;
                         int [] y = new int[4];
                         int [] yt = new int[4];
                         int []bitStore = new int[4];
@@ -228,7 +475,7 @@ public class XinLiao {
                         y[1] = buf.getRGB(i, j+1);
                         y[2] = buf.getRGB(i+1, j);
                         y[3] = buf.getRGB(i+1, j+1);
-                        D = calculateD(y[0], y[1], y[2], y[3]);
+                        D = calculateD(y[0]&0xFFFFFF, y[1]&0xFFFFFF, y[2]&0xFFFFFF, y[3]&0xFFFFFF);
                         
                         //menentukan k
                         if(D>=treshold)
@@ -276,6 +523,87 @@ public class XinLiao {
                             bitString += temp;
                         }
                         messageLength -= (12*k);
+                    }else{
+                        break;
+                    }
+                }
+            }
+            //mengubah bitString jadi String
+            for(int i=0; i<stream.length; i++){
+                if(bitString.length() >= 8)
+                    stream[i] = convertKBitStringToString(8, bitString.substring(0,8));
+                else
+                    stream[i] = convertKBitStringToString(8, bitString.substring(0));
+                if(bitString.length() >= 8)
+                    bitString = bitString.substring(8);
+                plainText += stream[i];
+            }
+            buf.flush();
+        } catch (IOException ex) {
+            Logger.getLogger(XinLiao.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        
+        return decryptExtended(plainText, key);
+    }
+    
+    private static String extractMessageGrayScale(String key, int messageLength, String stegoImage){
+        String plainText="";
+         float D, D_1;
+        File stegoFile;
+        BufferedImage buf;
+        int height, width = 0;
+        String bitString="";
+        String [] stream = new String[messageLength];
+        
+        stegoFile = new File(stegoImage);
+        
+        try {
+            buf = BMPDecoder.read(stegoFile);
+            height = buf.getHeight();
+            width = buf.getWidth();
+            messageLength *= 8;
+            for(int i=0; i<height; i+=2){
+                for(int j=0; j<width; j+=2){
+                    if(i+1 != height && j+1 != width && messageLength>0){
+                        //j=width-16 sampai j=width digunakan untuk menyimpan panjang pesan
+                        if(i==(height-1) && j>= (width-16))
+                            break;
+                        int [] y = new int[4];
+                        int [] yt = new int[4];
+                        int []bitStore = new int[4];
+                        int getter=0;
+                        
+                        
+                        y[0] = buf.getRGB(i, j);
+                        y[1] = buf.getRGB(i, j+1);
+                        y[2] = buf.getRGB(i+1, j);
+                        y[3] = buf.getRGB(i+1, j+1);
+                        D = calculateD(y[0]&0xFF, y[1]&0xFF, y[2]&0xFF, y[3]&0xFF);
+                        
+                        //menentukan k
+                        if(D>=treshold)
+                            k = kLow;
+                        else
+                            k = kHigh;
+                        
+                        //menentukan getter
+                        getter= 0xFF>>(8-k);
+                        
+                        for(int yi = 0; yi<4; yi++){
+                            int tempHasil;
+                            String temp;
+                            
+                            tempHasil = y[yi]&getter&0xFF;
+                            temp = Integer.toBinaryString(tempHasil);
+                            if(temp.length() < k){
+                                int sisa = k - temp.length();
+                                for(int si=0; si<sisa; si++)
+                                    temp = "0"+temp;
+                            }
+                            bitString += temp;
+                        }
+                        messageLength -= (4*k);
+                        
                     }
                 }
             }
@@ -374,11 +702,12 @@ public class XinLiao {
         int height=0, width=0;
         double sum = 0;
         BufferedImage cover, stego;
-        ColorStore [][] coverMap, stegoMap;
         File coverFile, stegoFile;
         
         if(isGrayscale)
             mode = 1;
+        else
+            mode = 3;
         coverFile = new File(coverImage);
         stegoFile = new File(stegoImage);
         try {
@@ -388,23 +717,12 @@ public class XinLiao {
             height = cover.getHeight();
             width = cover.getWidth();
             
-            coverMap = new ColorStore[height][width];
-            stegoMap = new ColorStore[height][width];
-            
             for(int i=0; i<height; i++){
                 for(int j=0; j<width; j++){
-                    coverMap[i][j] = new ColorStore(cover.getRGB(i, j));
-                }
-            }
-            for(int i=0; i<height; i++){
-                for(int j=0; j<width; j++){
-                    stegoMap[i][j] = new ColorStore(stego.getRGB(i, j));
-                }
-            }
-            
-            for(int i=0; i<height; i++){
-                for(int j=0; j<width; j++){
-                    sum += Math.pow((stegoMap[i][j].getColor() - coverMap[i][j].getColor()), 2);
+                    if(isGrayscale)
+                        sum += Math.pow((stego.getRGB(i, j)&0xFF) - (cover.getRGB(i, j)&0xFF), 2);
+                    else
+                        sum += Math.pow((stego.getRGB(i, j)&0xFFFFFF) - (cover.getRGB(i, j)&0xffffff), 2);
                 }
             }
             
@@ -484,10 +802,42 @@ public class XinLiao {
         return y2;
     }
     
-   /* public static void main(String [] args){
-        int messageLength = embedMessage("yusuf", "sari", "baboon.bmp", "stego_baboon.bmp");
-        System.out.println("messageLength : "+messageLength);
-        System.out.println("PSNR with mode ("+mode+"): "+PSNR(false, "baboon.bmp", "stego_baboon.bmp")+" dB");
-        System.out.println("message : "+extractMessage("sari", messageLength, "stego_baboon.bmp"));
-    }*/
+    private static String generateNBString(int nb){
+        String retval="";
+        StringBuilder sb = new StringBuilder();
+        Random rand = new Random();
+        
+        for(int i=0; i<nb; i++){
+            byte temp;
+            
+            //A = 65
+            //a = 97
+            if(rand.nextBoolean())
+                temp = 65;
+            else
+                temp = 97;
+            temp += Math.abs(rand.nextInt()%26);
+            sb.append((char)temp);
+            
+        }
+        
+        return sb.toString();
+    }
+    
+    public static void main(String [] args){
+        int messageLength;
+        String message;
+        //System.out.print("Masukkan banyaknya input : ");
+        //messageLength = input.nextInt();
+        //message = generateNBString(messageLength);
+        message = "baracudda";
+        messageLength = message.length();
+        System.out.println("pesan : "+message);
+        embedMessage(message, "key", "lena-gray.bmp", "stego_lena-gray.bmp");
+        //embedMessage(message, "key", "baboon.bmp", "stego_baboon.bmp");
+        //System.out.println("PSNR with mode ("+mode+"): "+PSNR(true, "lena-gray.bmp", "stego_lena-gray.bmp")+" dB");
+        //System.out.println("PSNR with mode ("+mode+"): "+PSNR(false, "baboon.bmp", "stego_baboon.bmp")+" dB");
+        System.out.println("message : "+extractMessage("key", "stego_lena-gray.bmp"));
+        //System.out.println("message : "+extractMessage("key", "stego_baboon.bmp"));
+    }
 }
