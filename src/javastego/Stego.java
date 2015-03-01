@@ -14,6 +14,7 @@ import java.nio.ByteBuffer;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.Random;
 import java.util.Set;
@@ -158,13 +159,14 @@ public class Stego {
             Random rng = new Random(key); // Ideally just create one instance globally
             // Note: use LinkedHashSet to maintain insertion order
             ArrayList<Integer> generated = new ArrayList<Integer>();
-            while (generated.size() < ht.getLength() + 64)
-            {
-                Integer next = rng.nextInt(height*width) + 1;
-                // As we're adding to a set, this will automatically do a containment check
-                if(!generated.contains(next)){
-                    generated.add(next);
-                }
+            for(int i=0;i<height*width*3;i++){
+                generated.add(i);
+            }
+            for(int i=0;i<generated.size();i++){
+                int temp = generated.get(i);
+                int randtemp = rng.nextInt(height*width*3);
+                generated.set(i, generated.get(randtemp));
+                generated.set(randtemp, temp);
             }
             String s = Integer.toBinaryString(ht.getLength());
             //masukin ukurannya
@@ -217,13 +219,14 @@ public class Stego {
             Random rng = new Random(key); // Ideally just create one instance globally
             // Note: use LinkedHashSet to maintain insertion order
             ArrayList<Integer> generated = new ArrayList<Integer>();
-            while (generated.size() < ht.getLength() + 64)
-            {
-                Integer next = rng.nextInt(height*width*3) + 1;
-                // As we're adding to a set, this will automatically do a containment check
-                if(!generated.contains(next)){
-                    generated.add(next);
-                }
+            for(int i=0;i<height*width*3;i++){
+                generated.add(i);
+            }
+            for(int i=0;i<generated.size();i++){
+                int temp = generated.get(i);
+                int randtemp = rng.nextInt(height*width*3);
+                generated.set(i, generated.get(randtemp));
+                generated.set(randtemp, temp);
             }
             String s = Integer.toBinaryString(ht.getLength());
             //masukin ukurannya
@@ -294,13 +297,14 @@ public class Stego {
         if(type==BufferedImage.TYPE_BYTE_INDEXED||type==BufferedImage.TYPE_BYTE_GRAY)
         {
             ArrayList<Integer> generated = new ArrayList<Integer>();
-            while (generated.size() < 64)
-            {
-                Integer next = rng.nextInt(height*width) + 1;
-                // As we're adding to a set, this will automatically do a containment check
-                if(!generated.contains(next)){
-                    generated.add(next);
-                }
+            for(int i=0;i<height*width*3;i++){
+                generated.add(i);
+            }
+            for(int i=0;i<generated.size();i++){
+                int temp = generated.get(i);
+                int randtemp = rng.nextInt(height*width*3);
+                generated.set(i, generated.get(randtemp));
+                generated.set(randtemp, temp);
             }
             int i;
             int n = 0;
@@ -322,14 +326,7 @@ public class Stego {
             //    System.out.println(n);
             }
             System.out.println(n);
-            while (generated.size() < n + 64)
-            {
-                Integer next = rng.nextInt(height*width) + 1;
-                // As we're adding to a set, this will automatically do a containment check
-                if(!generated.contains(next)){
-                    generated.add(next);
-                }
-            }
+            
             int charCount = 0;
             int tempChar = 0;
             String ret = "";
@@ -365,13 +362,14 @@ public class Stego {
         }
         else{
             ArrayList<Integer> generated = new ArrayList<Integer>();
-            while (generated.size() < 64)
-            {
-                Integer next = rng.nextInt(height*width *3) + 1;
-                // As we're adding to a set, this will automatically do a containment check
-                if(!generated.contains(next)){
-                    generated.add(next);
-                }
+            for(int i=0;i<height*width*3;i++){
+                generated.add(i);
+            }
+            for(int i=0;i<generated.size();i++){
+                int temp = generated.get(i);
+                int randtemp = rng.nextInt(height*width*3);
+                generated.set(i, generated.get(randtemp));
+                generated.set(randtemp, temp);
             }
             int i;
             int n = 0;
@@ -409,14 +407,6 @@ public class Stego {
             //    System.out.println(n);
             }
             System.out.println(n);
-            while (generated.size() < n + 64)
-            {
-                Integer next = rng.nextInt(height*width *3) + 1;
-                // As we're adding to a set, this will automatically do a containment check
-                if(!generated.contains(next)){
-                    generated.add(next);
-                }
-            }
             int charCount = 0;
             int tempChar = 0;
             String ret = "";
