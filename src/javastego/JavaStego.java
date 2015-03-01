@@ -62,19 +62,34 @@ public class JavaStego {
         Import(filename);
     }
     
-    public int setMark(int n, int level) {
-        int ans = n;
-        if(level==0 || level==1) { 
-            ans &= ~(1<<1);
-            if(level==0) ans &= ~1;
-            else ans |= 1;
+    public int setMark(int n, int d, char c) {
+        //get level
+        int level;
+        if(d<=7) level = 2;
+        else if(d>=8 && d<=15) level = 3;
+        else if(d>=16 && d<=31) level = 4;
+        else level = 5;
+        
+        //set bitmark pada n
+        int l=1, r=0;
+        if(c=='r') {l=17; r=16;}
+        else if(c=='g') {l=9; r=8;}
+        else if(c=='b') {l=1; r=0;}
+        
+        if(level==2 || level==3) { 
+            n &= ~(1<<l);
+            if(level==3) n &= ~r;
+            else n |= r;
         }
         else {
-            ans |= (1<<1);
-            if(level==3) ans &= ~1;
-            else ans |= 1;
+            n |= (1<<l);
+            if(level==4) n &= ~r;
+            else n |= r;
         }
-        return ans;
+        
+        //hitung kapasitas
+        int cap = (9*level) - 2;
+        return cap;
     }
     
     public int getLevel(int d) {
@@ -124,58 +139,15 @@ public class JavaStego {
                     dG /= 8;
                     dR /= 8;
                     
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    /*int idx = 0;
-                    int xmin = MatPixel[row][col];
-                    for(int i=row; i<row+3; i++) {
-                        for(int j=col; j<col+3; j++) {
-                            PixAr[idx] = MatPixel[i][j];
-                            idx++;
-                            
-                            if(MatPixel[i][j]<xmin)
-                                xmin = MatPixel[i][j];
-                        }
+                    char c;
+                    c = 'b';
+                    capacity += this.setMark(MatPixel[row+2][col+2], dB, c);
+                    if(isColored) {
+                        c = 'g';
+                        capacity += this.setMark(MatPixel[row+2][col+2], dG, c);
+                        c = 'r';
+                        capacity += this.setMark(MatPixel[row+2][col+2], dR, c);
                     }
-                    
-                    int d = 0;
-                    for(int i=0; i<9; i++) {
-                        d += (PixAr[i]-xmin);
-                    }
-                    d /= 8;
-                    
-                    int level; //0-3
-                    if(d<=7) level = 0;
-                    else if(d>=8 && d<=15) level = 1;
-                    else if(d>=16 && d<=31) level = 2;
-                    else level = 3;*/
-                    
-                    //belum sisip bit tanda
-                    //belum hitung kapasitas
                 }
             }
         }
