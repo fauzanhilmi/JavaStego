@@ -41,7 +41,7 @@ public class Stego {
     int key;
     int type;
     BufferedImage buf;
-    
+    public String skey;
   /*  public static void main(String[] args) {
         String in = "baboon.bmp";
         String ou = "babun.bmp";
@@ -354,6 +354,13 @@ public class Stego {
                     tempChar = 0;
                 }
             }
+            int keyIdx = 0;
+
+
+          /*  for(i=0; i<ret.length(); i++){
+                    ret += (char)((ret.charAt(i)+skey.charAt(keyIdx%skey.length()))%256);
+                    keyIdx++;
+            }*/
             return ret;
         }
         else{
@@ -447,6 +454,13 @@ public class Stego {
                     tempChar = 0;
                 }
             }
+            int keyIdx = 0;
+
+
+          /*  for(i=0; i<ret.length(); i++){
+                    ret += (char)((ret.charAt(i)-skey.charAt(keyIdx%skey.length())));
+                    keyIdx++;
+            }*/
             return ret;
         }
     }
@@ -477,4 +491,14 @@ public class Stego {
     public int getTextSize(){
         return (ht.getLength()/8)/1024;
     }
+    
+    public void encrypt(String key){
+        ht.encrypt(key);
+    }
+    
+    public void decrypt(String key){
+        ht.decrypt(key);
+    }
+    
+    
 }

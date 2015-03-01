@@ -34,7 +34,7 @@ public class JavaStego {
     int height;
     int width;
     
-   public static void main(String[] args) {
+   /*public static void main(String[] args) {
         String in = "lena-gray-s.bmp";
         String ou = "tes.bmp";
         
@@ -48,7 +48,7 @@ public class JavaStego {
         }
         //js.iseng();
         js.Export(ou);
-    }
+    }*/
     
     public JavaStego() {
         //buf = null;

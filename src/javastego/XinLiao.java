@@ -451,7 +451,7 @@ public class XinLiao {
             intStore[3] = ((int)convertStringToByte(intBitString.substring(24)));
             messageLength = intStore[0] + intStore[1] + intStore[2] + intStore[3];
             System.out.println("message length : "+messageLength);
-            stream = new String[9];
+            stream = new String[messageLength];
             if(buf.getType() == BufferedImage.TYPE_BYTE_GRAY 
                     || buf.getType() == BufferedImage.TYPE_USHORT_GRAY 
                     || buf.getType()==BufferedImage.TYPE_BYTE_INDEXED){
@@ -710,9 +710,9 @@ public class XinLiao {
             cover = BMPDecoder.read(coverFile);
             stego = BMPDecoder.read(stegoFile);
             
-            if(buf.getType() == BufferedImage.TYPE_BYTE_GRAY 
-                    || buf.getType() == BufferedImage.TYPE_USHORT_GRAY 
-                    || buf.getType()==BufferedImage.TYPE_BYTE_INDEXED)
+            if(cover.getType() == BufferedImage.TYPE_BYTE_GRAY 
+                    || cover.getType() == BufferedImage.TYPE_USHORT_GRAY 
+                    || cover.getType()==BufferedImage.TYPE_BYTE_INDEXED)
                 mode = 1;
             else   
                 mode = 3;
@@ -721,7 +721,7 @@ public class XinLiao {
             
             for(int i=0; i<height; i++){
                 for(int j=0; j<width; j++){
-                    if(isGrayscale)
+                    if(mode==1)
                         sum += Math.pow((stego.getRGB(i, j)&0xFF) - (cover.getRGB(i, j)&0xFF), 2);
                     else
                         sum += Math.pow((stego.getRGB(i, j)&0xFFFFFF) - (cover.getRGB(i, j)&0xffffff), 2);
@@ -826,7 +826,7 @@ public class XinLiao {
         return sb.toString();
     }
     
-    public static void main(String [] args){
+    /*public static void main(String [] args){
         int messageLength;
         String message;
         //System.out.print("Masukkan banyaknya input : ");
@@ -841,5 +841,5 @@ public class XinLiao {
         //System.out.println("PSNR with mode ("+mode+"): "+PSNR( "baboon.bmp", "stego_baboon.bmp")+" dB");
         System.out.println("message : "+extractMessage("key", "stego_lena-gray.bmp"));
         //System.out.println("message : "+extractMessage("key", "stego_baboon.bmp"));
-    }
+    }*/
 }

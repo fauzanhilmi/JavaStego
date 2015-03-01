@@ -26,6 +26,26 @@ public class HiddenText {
         data=_data;
     }
     
+    public void encrypt(String key){
+        int keyIdx = 0;
+        
+        
+        for(int i=0; i<data.length; i++){
+                data[i] = (byte) (data[i]+key.charAt(keyIdx%key.length()));
+                keyIdx++;
+        }
+    }
+    
+    public void decrypt(String key){
+        int keyIdx = 0;
+        
+        
+        for(int i=0; i<data.length; i++){
+                data[i] = (byte) (data[i]-key.charAt(keyIdx%key.length()));
+                keyIdx++;
+        }
+    }
+    
     public boolean getNextBit(){
         
         byte temp = data[byteCount];
