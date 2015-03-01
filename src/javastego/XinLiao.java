@@ -837,8 +837,8 @@ public class XinLiao {
         System.out.println("pesan : "+message);
         embedMessage(message, "key", "lena-gray.bmp", "stego_lena-gray.bmp");
         //embedMessage(message, "key", "baboon.bmp", "stego_baboon.bmp");
-        //System.out.println("PSNR with mode ("+mode+"): "+PSNR(true, "lena-gray.bmp", "stego_lena-gray.bmp")+" dB");
-        //System.out.println("PSNR with mode ("+mode+"): "+PSNR(false, "baboon.bmp", "stego_baboon.bmp")+" dB");
+        //System.out.println("PSNR with mode ("+mode+"): "+PSNR("lena-gray.bmp", "stego_lena-gray.bmp")+" dB");
+        //System.out.println("PSNR with mode ("+mode+"): "+PSNR( "baboon.bmp", "stego_baboon.bmp")+" dB");
         System.out.println("message : "+extractMessage("key", "stego_lena-gray.bmp"));
         //System.out.println("message : "+extractMessage("key", "stego_baboon.bmp"));
     }
