@@ -48,7 +48,6 @@ public class HiddenText {
         return (byteCount != data.length);
     }
     
-
     public int getLength(){
         return data.length*8;
     }

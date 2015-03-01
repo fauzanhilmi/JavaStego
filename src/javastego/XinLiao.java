@@ -802,6 +802,7 @@ public class XinLiao {
         return y2;
     }
     
+<<<<<<< HEAD
     private static String generateNBString(int nb){
         String retval="";
         StringBuilder sb = new StringBuilder();
@@ -825,19 +826,7 @@ public class XinLiao {
     }
     
     public static void main(String [] args){
-        int messageLength;
-        String message;
-        //System.out.print("Masukkan banyaknya input : ");
-        //messageLength = input.nextInt();
-        //message = generateNBString(messageLength);
-        message = "baracudda";
-        messageLength = message.length();
-        System.out.println("pesan : "+message);
-        embedMessage(message, "key", "lena-gray.bmp", "stego_lena-gray.bmp");
-        //embedMessage(message, "key", "baboon.bmp", "stego_baboon.bmp");
-        //System.out.println("PSNR with mode ("+mode+"): "+PSNR(true, "lena-gray.bmp", "stego_lena-gray.bmp")+" dB");
-        //System.out.println("PSNR with mode ("+mode+"): "+PSNR(false, "baboon.bmp", "stego_baboon.bmp")+" dB");
-        System.out.println("message : "+extractMessage("key", "stego_lena-gray.bmp"));
-        //System.out.println("message : "+extractMessage("key", "stego_baboon.bmp"));
+        //do nothing
     }
+
 }
