@@ -6,7 +6,10 @@
 package javastego;
 
 import java.awt.image.BufferedImage;
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.io.IOException;
 import static java.lang.Integer.max;
 import static java.lang.Integer.min;
@@ -66,10 +69,19 @@ public class XinLiao {
                     || buf.getType() == BufferedImage.TYPE_USHORT_GRAY 
                     || buf.getType()==BufferedImage.TYPE_BYTE_INDEXED){
                 buf.flush();
+                if((height*width*kLow)<((message.length()+16)*8)){
+                    System.out.println("maxsize : "+(height*width*kLow)+" bit");
+                    System.out.println("msglen : "+message.length()*8+" bit");
+                    System.out.println("gsout");
+                    return -1;
+                }
                 return embedMessageGrayScale(message, key, coverImage, stegoImage);
+            }else{
+                if((height*width*3*kLow)<((message.length()+16)*8)){
+                    System.out.println("rgbout");
+                    return -1;
+                }
             }
-            if((height*width)<(message.length()*8/kLow + 1))
-                return -1;
             
             //menyimpan informasi panjang pesan di akhir gambar
             String intBitString = Integer.toBinaryString(message.length());
@@ -433,24 +445,20 @@ public class XinLiao {
             String intBitString = "";
             for(int j=width-16; j<width; j++){
                 int i = height-1;
-                System.out.println("p"+i+j+": "+Integer.toHexString(buf.getRGB(i, j)));
                 String inttemp = Integer.toBinaryString(buf.getRGB(i, j)&0x3);
                 if(inttemp.length()<2){
                     int sisa = 2 - inttemp.length();
                     for(int si = 0; si<sisa; si++)
                         inttemp = "0" + inttemp;
                 }
-                System.out.println("inttemp : "+inttemp);
                 intBitString += inttemp;
             }
-            System.out.println("bs : "+intBitString);
             int [] intStore = new int[4];
             intStore[0] = ((int)convertStringToByte(intBitString.substring(0, 8)))<<24;
             intStore[1] = ((int)convertStringToByte(intBitString.substring(8, 16)))<<16;
             intStore[2] = ((int)convertStringToByte(intBitString.substring(16, 24)))<<8;
             intStore[3] = ((int)convertStringToByte(intBitString.substring(24)));
             messageLength = intStore[0] + intStore[1] + intStore[2] + intStore[3];
-            System.out.println("message length : "+messageLength);
             stream = new String[messageLength];
             if(buf.getType() == BufferedImage.TYPE_BYTE_GRAY 
                     || buf.getType() == BufferedImage.TYPE_USHORT_GRAY 
@@ -827,19 +835,28 @@ public class XinLiao {
     }
     
     /*public static void main(String [] args){
-        int messageLength;
-        String message;
-        //System.out.print("Masukkan banyaknya input : ");
-        //messageLength = input.nextInt();
-        //message = generateNBString(messageLength);
-        message = "baracudda";
-        messageLength = message.length();
-        System.out.println("pesan : "+message);
-        embedMessage(message, "key", "lena-gray.bmp", "stego_lena-gray.bmp");
-        //embedMessage(message, "key", "baboon.bmp", "stego_baboon.bmp");
-        //System.out.println("PSNR with mode ("+mode+"): "+PSNR("lena-gray.bmp", "stego_lena-gray.bmp")+" dB");
-        //System.out.println("PSNR with mode ("+mode+"): "+PSNR( "baboon.bmp", "stego_baboon.bmp")+" dB");
-        System.out.println("message : "+extractMessage("key", "stego_lena-gray.bmp"));
-        //System.out.println("message : "+extractMessage("key", "stego_baboon.bmp"));
+        try {
+            int messageLength;
+            String message="";
+            String temp;
+            BufferedReader inputFile = null;
+            
+            inputFile = new BufferedReader(new FileReader("testcase.txt"));
+            while((temp = inputFile.readLine()) != null){
+                message += temp + " ";
+            }
+            
+            System.out.println("pesan : "+message);
+            embedMessage(message, "key", "baboonRGB.bmp", "stego_baboon.bmp");
+            //embedMessage(message, "key", "baboon.bmp", "stego_baboon.bmp");
+            //System.out.println("PSNR with mode ("+mode+"): "+PSNR("lena-gray.bmp", "stego_lena-gray.bmp")+" dB");
+            //System.out.println("PSNR with mode ("+mode+"): "+PSNR( "baboon.bmp", "stego_baboon.bmp")+" dB");
+            System.out.println("message : "+extractMessage("key", "stego_baboon.bmp"));
+            //System.out.println("message : "+extractMessage("key", "stego_baboon.bmp"));
+        } catch (FileNotFoundException ex) {
+            Logger.getLogger(XinLiao.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (IOException ex) {
+            Logger.getLogger(XinLiao.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }*/
 }
