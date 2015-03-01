@@ -693,7 +693,7 @@ public class XinLiao {
         return max(y0, max(y1, max(y1, y3)));
     }
     
-    public static double PSNR(boolean isGrayscale, String coverImage, String stegoImage){
+    public static double PSNR(String coverImage, String stegoImage){
         //psnr = 20*log([256 | 16777216]/rms)
         //rms = sqrt(1/MxNx[1 | 3] x sum(pixelA - pixelB))
         
@@ -704,16 +704,18 @@ public class XinLiao {
         BufferedImage cover, stego;
         File coverFile, stegoFile;
         
-        if(isGrayscale)
-            mode = 1;
-        else
-            mode = 3;
         coverFile = new File(coverImage);
         stegoFile = new File(stegoImage);
         try {
             cover = BMPDecoder.read(coverFile);
             stego = BMPDecoder.read(stegoFile);
             
+            if(buf.getType() == BufferedImage.TYPE_BYTE_GRAY 
+                    || buf.getType() == BufferedImage.TYPE_USHORT_GRAY 
+                    || buf.getType()==BufferedImage.TYPE_BYTE_INDEXED)
+                mode = 1;
+            else   
+                mode = 3;
             height = cover.getHeight();
             width = cover.getWidth();
             
