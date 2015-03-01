@@ -34,6 +34,8 @@ public class View extends javax.swing.JApplet {
     File file ;
     File filetext ;
     int messageLength;
+    int maxSize;
+    int textSize;
     /**
      * Initializes the applet View
      */
@@ -90,6 +92,7 @@ public class View extends javax.swing.JApplet {
     private void initComponents() {
 
         buttonGroup1 = new javax.swing.ButtonGroup();
+        jLabel3 = new javax.swing.JLabel();
         chooseImgBut = new javax.swing.JToggleButton();
         chooseFileBut = new javax.swing.JToggleButton();
         runBut = new javax.swing.JButton();
@@ -104,6 +107,13 @@ public class View extends javax.swing.JApplet {
         algo3rad = new javax.swing.JRadioButton();
         algo2rad = new javax.swing.JRadioButton();
         algo1rad = new javax.swing.JRadioButton();
+        fileNameLabel = new javax.swing.JLabel();
+        maxSizeLabel = new javax.swing.JLabel();
+        fileTextLabel = new javax.swing.JLabel();
+        sizeLabel = new javax.swing.JLabel();
+        warningText = new javax.swing.JLabel();
+
+        jLabel3.setText("jLabel3");
 
         chooseImgBut.setText("Choose Image");
         chooseImgBut.addActionListener(new java.awt.event.ActionListener() {
@@ -147,7 +157,10 @@ public class View extends javax.swing.JApplet {
 
         algo2rad.setText("Algo2");
 
+        algo1rad.setSelected(true);
         algo1rad.setText("Algo1");
+
+        maxSizeLabel.setText("        kb");
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
@@ -158,12 +171,17 @@ public class View extends javax.swing.JApplet {
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(chooseImgBut)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(fileNameLabel)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addComponent(algo1rad))
                     .addComponent(jButton1, javax.swing.GroupLayout.Alignment.TRAILING)
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(runBut)
+                            .addGroup(layout.createSequentialGroup()
+                                .addComponent(runBut)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(warningText))
                             .addGroup(layout.createSequentialGroup()
                                 .addGap(9, 9, 9)
                                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -178,11 +196,20 @@ public class View extends javax.swing.JApplet {
                             .addComponent(radExt)
                             .addComponent(radSteg)))
                     .addGroup(layout.createSequentialGroup()
-                        .addComponent(chooseFileBut)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(algo3rad, javax.swing.GroupLayout.Alignment.TRAILING)
-                            .addComponent(algo2rad, javax.swing.GroupLayout.Alignment.TRAILING))))
+                            .addComponent(chooseFileBut)
+                            .addComponent(sizeLabel))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                            .addGroup(layout.createSequentialGroup()
+                                .addGap(0, 0, Short.MAX_VALUE)
+                                .addComponent(algo2rad))
+                            .addGroup(layout.createSequentialGroup()
+                                .addComponent(fileTextLabel)
+                                .addGap(43, 43, 43)
+                                .addComponent(maxSizeLabel)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                .addComponent(algo3rad)))))
                 .addContainerGap(31, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
@@ -191,22 +218,30 @@ public class View extends javax.swing.JApplet {
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(layout.createSequentialGroup()
                         .addGap(26, 26, 26)
-                        .addComponent(chooseImgBut))
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(chooseImgBut)
+                            .addComponent(fileNameLabel)))
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                         .addContainerGap()
                         .addComponent(algo1rad)))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(algo2rad)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(chooseFileBut)
-                    .addComponent(algo3rad))
-                .addGap(24, 24, 24)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(keyField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jLabel1))
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(layout.createSequentialGroup()
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(algo2rad))
+                    .addGroup(layout.createSequentialGroup()
+                        .addGap(16, 16, 16)
+                        .addComponent(sizeLabel)))
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(layout.createSequentialGroup()
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(chooseFileBut)
+                            .addComponent(algo3rad)
+                            .addComponent(maxSizeLabel)
+                            .addComponent(fileTextLabel))
+                        .addGap(24, 24, 24)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(keyField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(jLabel1))
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addGroup(layout.createSequentialGroup()
                                 .addGap(30, 30, 30)
@@ -215,16 +250,18 @@ public class View extends javax.swing.JApplet {
                                 .addGap(54, 54, 54)
                                 .addComponent(radSteg)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(radExt)))
+                                .addComponent(radExt))
+                            .addGroup(layout.createSequentialGroup()
+                                .addGap(30, 30, 30)
+                                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                             .addComponent(runBut)
-                            .addComponent(jButton1))
-                        .addContainerGap())
-                    .addGroup(layout.createSequentialGroup()
-                        .addGap(30, 30, 30)
-                        .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addContainerGap(31, Short.MAX_VALUE))))
+                            .addComponent(jButton1)))
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                        .addGap(0, 0, Short.MAX_VALUE)
+                        .addComponent(warningText)))
+                .addContainerGap())
         );
     }// </editor-fold>//GEN-END:initComponents
 
@@ -236,6 +273,9 @@ public class View extends javax.swing.JApplet {
         if(returnVal == JFileChooser.APPROVE_OPTION){
             filetext = jc.getSelectedFile();
             steIn.readHiddenText(filetext.getAbsolutePath());
+            fileTextLabel.setText(filetext.getAbsolutePath());
+            sizeLabel.setText(Integer.toString(steIn.getTextSize())+" kb");
+            textSize = steIn.getTextSize();
         }
     }//GEN-LAST:event_chooseFileButActionPerformed
 
@@ -264,6 +304,9 @@ public class View extends javax.swing.JApplet {
             }
             a.setSize(height, width);
             a.setVisible(true);    
+            fileNameLabel.setText(file.getAbsolutePath());
+            maxSizeLabel.setText("max size : "+Integer.toString(steIn.getMaxSize())+" kb");
+            maxSize = steIn.getMaxSize();
         }
         
     }//GEN-LAST:event_chooseImgButActionPerformed
@@ -276,19 +319,26 @@ public class View extends javax.swing.JApplet {
             key += (int) (skey.charAt(i));
         }
         if(algo1rad.isSelected()){   
+          
             steIn.setKey(key);
             if(radSteg.isSelected()){
-                steIn.setStego();
-                steIn.Export("nyoba.bmp");
-                File file= new File("nyoba.bmp");
-                ViewImage vi = new ViewImage();
-                vi.setFile(file);
-                JFrame a = new JFrame();
-                vi.init();
-                a.getContentPane().add(vi);
-                a.pack();
-                a.setSize(height, width);
-                a.setVisible(true);
+                if(maxSize>textSize){
+                    steIn.setStego();
+                    steIn.Export("nyoba.bmp");
+                    File file= new File("nyoba.bmp");
+                    ViewImage vi = new ViewImage();
+                    vi.setFile(file);
+                    JFrame a = new JFrame();
+                    vi.init();
+                    a.getContentPane().add(vi);
+                    a.pack();
+                    a.setSize(height, width);
+                    a.setVisible(true);
+                }
+                else{
+                    warningText.setText("file teks terlalu besar");
+                    
+                }
             }
             else{
                 jTextArea1.setText(steIn.getStego());
@@ -334,14 +384,20 @@ public class View extends javax.swing.JApplet {
     private javax.swing.ButtonGroup buttonGroup1;
     private javax.swing.JToggleButton chooseFileBut;
     private javax.swing.JToggleButton chooseImgBut;
+    private javax.swing.JLabel fileNameLabel;
+    private javax.swing.JLabel fileTextLabel;
     private javax.swing.JButton jButton1;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
+    private javax.swing.JLabel jLabel3;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JTextArea jTextArea1;
     private javax.swing.JTextField keyField;
+    private javax.swing.JLabel maxSizeLabel;
     private javax.swing.JRadioButton radExt;
     private javax.swing.JRadioButton radSteg;
     private javax.swing.JButton runBut;
+    private javax.swing.JLabel sizeLabel;
+    private javax.swing.JLabel warningText;
     // End of variables declaration//GEN-END:variables
 }

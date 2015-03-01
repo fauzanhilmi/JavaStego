@@ -39,6 +39,8 @@ public class Stego {
     int height;
     int width;
     int key;
+    int type;
+    BufferedImage buf;
     
   /*  public static void main(String[] args) {
         String in = "baboon.bmp";
@@ -98,11 +100,12 @@ public class Stego {
     }
     
     public void Import(String filename) {
-        BufferedImage buf = null;
+        buf = null;
         File f = new File(filename);
         
         try {
             buf = BMPDecoder.read(f);
+            type = buf.getType();
         } catch (IOException ex) {
             Logger.getLogger(JavaStego.class.getName()).log(Level.SEVERE, null, ex);
         }
@@ -122,7 +125,6 @@ public class Stego {
     }
     
     public void Export(String filename) {
-        BufferedImage buf = new BufferedImage(height,width,TYPE_INT_RGB);
         int px;
         
         for(int i=0; i<height; i++) {
@@ -152,174 +154,301 @@ public class Stego {
     
     public void setStego(){
         //membangkitkan bilangan random untuk posisi
-        Random rand = new Random(key);
-        Random rng = new Random(key); // Ideally just create one instance globally
-        // Note: use LinkedHashSet to maintain insertion order
-        ArrayList<Integer> generated = new ArrayList<Integer>();
-        while (generated.size() < ht.getLength() + 64)
-        {
-            Integer next = rng.nextInt(height*width*3) + 1;
-            // As we're adding to a set, this will automatically do a containment check
-            if(!generated.contains(next)){
-                generated.add(next);
+        if(type==BufferedImage.TYPE_BYTE_INDEXED||type==BufferedImage.TYPE_BYTE_GRAY){
+            Random rng = new Random(key); // Ideally just create one instance globally
+            // Note: use LinkedHashSet to maintain insertion order
+            ArrayList<Integer> generated = new ArrayList<Integer>();
+            while (generated.size() < ht.getLength() + 64)
+            {
+                Integer next = rng.nextInt(height*width) + 1;
+                // As we're adding to a set, this will automatically do a containment check
+                if(!generated.contains(next)){
+                    generated.add(next);
+                }
             }
-        }
-        String s = Integer.toBinaryString(ht.getLength());
-        //masukin ukurannya
-        int gencon = 0;
-        int i;
-        for(i=0;i<64-s.length();i++){
-        //    System.out.println(i);
-            int randtemp = generated.get(gencon);
-            gencon++;
-            int x = (randtemp/3) / height;
-            int y = (randtemp/3) % height;
-           
-            if(randtemp%3==0){
+            String s = Integer.toBinaryString(ht.getLength());
+            //masukin ukurannya
+            int gencon = 0;
+            int i;
+            for(i=0;i<64-s.length();i++){
+            //    System.out.println(i);
+                int randtemp = generated.get(gencon);
+                gencon++;
+                int x = (randtemp) / height;
+                int y = (randtemp) % height;
+
                 MatPixel[x][y].setLSBRed(false);
-            }
-            else if(randtemp%3==1){
+
                 MatPixel[x][y].setLSBGreen(false);
-            }
-            else{
+
                 MatPixel[x][y].setLSBBlue(false);
             }
-        }
-        for(i=64-s.length();i<64;i++){
-            int randtemp = generated.get(gencon);
-            gencon++;
-            int x = (randtemp/3) / height;
-            int y = (randtemp/3) % height;
-            if(randtemp%3==0){
+            for(i=64-s.length();i<64;i++){
+                int randtemp = generated.get(gencon);
+                gencon++;
+                int x = (randtemp) / height;
+                int y = (randtemp) % height;
                 MatPixel[x][y].setLSBRed(s.charAt(i+s.length()-64)=='1');
-            }
-            else if(randtemp%3==1){
                 MatPixel[x][y].setLSBGreen(s.charAt(i+s.length()-64)=='1');
-            }
-            else{
                 MatPixel[x][y].setLSBBlue(s.charAt(i+s.length()-64)=='1');
             }
+            //masukin teksnya
+            while(ht.isNext()){
+
+
+                int randtemp = generated.get(gencon);
+                gencon++;
+
+                int x = (randtemp) / height;
+                int y = (randtemp) % height;
+                boolean tempBit = ht.getNextBit();
+                MatPixel[x][y].setLSBRed(tempBit);
+
+                MatPixel[x][y].setLSBGreen(tempBit);
+
+                
+                MatPixel[x][y].setLSBBlue(tempBit);
+
+                
+                i++;
+            }
         }
-        //masukin teksnya
-        while(ht.isNext()){
-            
-            
-            int randtemp = generated.get(gencon);
-            gencon++;
-             
-            int x = (randtemp/3) / height;
-            int y = (randtemp/3) % height;
-            if(randtemp%3==0){
-                MatPixel[x][y].setLSBRed(ht.getNextBit());
-                
+        else{
+            Random rng = new Random(key); // Ideally just create one instance globally
+            // Note: use LinkedHashSet to maintain insertion order
+            ArrayList<Integer> generated = new ArrayList<Integer>();
+            while (generated.size() < ht.getLength() + 64)
+            {
+                Integer next = rng.nextInt(height*width*3) + 1;
+                // As we're adding to a set, this will automatically do a containment check
+                if(!generated.contains(next)){
+                    generated.add(next);
+                }
             }
-            else if(randtemp%3==1){
-                MatPixel[x][y].setLSBGreen(ht.getNextBit());
-                
+            String s = Integer.toBinaryString(ht.getLength());
+            //masukin ukurannya
+            int gencon = 0;
+            int i;
+            for(i=0;i<64-s.length();i++){
+            //    System.out.println(i);
+                int randtemp = generated.get(gencon);
+                gencon++;
+                int x = (randtemp/3) / height;
+                int y = (randtemp/3) % height;
+
+                if(randtemp%3==0){
+                    MatPixel[x][y].setLSBRed(false);
+                }
+                else if(randtemp%3==1){
+                    MatPixel[x][y].setLSBGreen(false);
+                }
+                else{
+                    MatPixel[x][y].setLSBBlue(false);
+                }
             }
-            else{
-                MatPixel[x][y].setLSBBlue(ht.getNextBit());
-               
+            for(i=64-s.length();i<64;i++){
+                int randtemp = generated.get(gencon);
+                gencon++;
+                int x = (randtemp/3) / height;
+                int y = (randtemp/3) % height;
+                if(randtemp%3==0){
+                    MatPixel[x][y].setLSBRed(s.charAt(i+s.length()-64)=='1');
+                }
+                else if(randtemp%3==1){
+                    MatPixel[x][y].setLSBGreen(s.charAt(i+s.length()-64)=='1');
+                }
+                else{
+                    MatPixel[x][y].setLSBBlue(s.charAt(i+s.length()-64)=='1');
+                }
             }
-            i++;
+            //masukin teksnya
+            while(ht.isNext()){
+
+
+                int randtemp = generated.get(gencon);
+                gencon++;
+
+                int x = (randtemp/3) / height;
+                int y = (randtemp/3) % height;
+                if(randtemp%3==0){
+                    MatPixel[x][y].setLSBRed(ht.getNextBit());
+
+                }
+                else if(randtemp%3==1){
+                    MatPixel[x][y].setLSBGreen(ht.getNextBit());
+
+                }
+                else{
+                    MatPixel[x][y].setLSBBlue(ht.getNextBit());
+
+                }
+                i++;
+            }
         }
     }
     
     public String getStego(){
         Random rand = new Random(key);
-         Random rng = new Random(key); // Ideally just create one instance globally
+        Random rng = new Random(key); // Ideally just create one instance globally
         // Note: use LinkedHashSet to maintain insertion order
-        ArrayList<Integer> generated = new ArrayList<Integer>();
-        while (generated.size() < 64)
+        if(type==BufferedImage.TYPE_BYTE_INDEXED||type==BufferedImage.TYPE_BYTE_GRAY)
         {
-            Integer next = rng.nextInt(height*width *3) + 1;
-            // As we're adding to a set, this will automatically do a containment check
-            if(!generated.contains(next)){
-                generated.add(next);
+            ArrayList<Integer> generated = new ArrayList<Integer>();
+            while (generated.size() < 64)
+            {
+                Integer next = rng.nextInt(height*width) + 1;
+                // As we're adding to a set, this will automatically do a containment check
+                if(!generated.contains(next)){
+                    generated.add(next);
+                }
             }
-        }
-        int i;
-        int n = 0;
-        int temp;
-        int gencon = 0;
-        
-        //membaca ukurannya
-        for(i=0;i<64;i++){
-            n = n << 1;
-            int randtemp = generated.get(gencon);
-            gencon++;
-            int x = (randtemp/3) / height;
-            int y = (randtemp/3) % height;
-            if(randtemp%3==0){
+            int i;
+            int n = 0;
+            int temp;
+            int gencon = 0;
+
+            //membaca ukurannya
+            for(i=0;i<64;i++){
+                n = n << 1;
+                int randtemp = generated.get(gencon);
+                gencon++;
+                int x = (randtemp) / height;
+                int y = (randtemp) % height;
+
                 if(MatPixel[x][y].getLSBRed()){
                     n += 1;
                 }
-                 
-                
-                
+
+            //    System.out.println(n);
             }
-            else if(randtemp%3==1){
-                if(MatPixel[x][y].getLSBGreen()){
-                    n += 1;      
+            System.out.println(n);
+            while (generated.size() < n + 64)
+            {
+                Integer next = rng.nextInt(height*width) + 1;
+                // As we're adding to a set, this will automatically do a containment check
+                if(!generated.contains(next)){
+                    generated.add(next);
                 }
-                 
             }
-            else{
-                if(MatPixel[x][y].getLSBBlue()){
-                    n += 1;
-                }
-             
-                    
-            }
-        //    System.out.println(n);
-        }
-        System.out.println(n);
-        while (generated.size() < n + 64)
-        {
-            Integer next = rng.nextInt(height*width *3) + 1;
-            // As we're adding to a set, this will automatically do a containment check
-            if(!generated.contains(next)){
-                generated.add(next);
-            }
-        }
-        int charCount = 0;
-        int tempChar = 0;
-        String ret = "";
-        for(i=0;i<n;i++){
-            
-            
-            tempChar = tempChar<<1  ;
-            int randtemp = generated.get(gencon);
-            gencon++;
-            int x = (randtemp/3) / height;
-            int y = (randtemp/3) % height;
-            //if(i==0 || i==1) System.out.println(randtemp);
-            if(randtemp%3==0){
+            int charCount = 0;
+            int tempChar = 0;
+            String ret = "";
+            for(i=0;i<n;i++){
+
+
+                tempChar = tempChar<<1  ;
+                int randtemp = generated.get(gencon);
+                gencon++;
+                int x = (randtemp) / height;
+                int y = (randtemp) % height;
+                //if(i==0 || i==1) System.out.println(randtemp);
                 if(MatPixel[x][y].getLSBRed()){
-                    tempChar += 1;
+                     tempChar += 1;
                 }
-                
-            }
-            else if(randtemp%3==1){
-                if(MatPixel[x][y].getLSBGreen()){
-                    tempChar += 1;
-                }
-            }
-            else{
-                if(MatPixel[x][y].getLSBBlue()){
-                    tempChar += 1;  
+                charCount++;
+                //ambil perbyte yaitu 8
+                if(charCount == 8 ){
+                     char a = (char) tempChar;
+                    charCount = 0;
+                    ret+=a;
+                    tempChar = 0;
                 }
             }
-            charCount++;
-            //ambil perbyte yaitu 8
-            if(charCount == 8 ){
-                 char a = (char) tempChar;
-                charCount = 0;
-                ret+=a;
-                tempChar = 0;
-            }
+            return ret;
         }
-        return ret;
+        else{
+            ArrayList<Integer> generated = new ArrayList<Integer>();
+            while (generated.size() < 64)
+            {
+                Integer next = rng.nextInt(height*width *3) + 1;
+                // As we're adding to a set, this will automatically do a containment check
+                if(!generated.contains(next)){
+                    generated.add(next);
+                }
+            }
+            int i;
+            int n = 0;
+            int temp;
+            int gencon = 0;
+
+            //membaca ukurannya
+            for(i=0;i<64;i++){
+                n = n << 1;
+                int randtemp = generated.get(gencon);
+                gencon++;
+                int x = (randtemp/3) / height;
+                int y = (randtemp/3) % height;
+                if(randtemp%3==0){
+                    if(MatPixel[x][y].getLSBRed()){
+                        n += 1;
+                    }
+
+
+
+                }
+                else if(randtemp%3==1){
+                    if(MatPixel[x][y].getLSBGreen()){
+                        n += 1;      
+                    }
+
+                }
+                else{
+                    if(MatPixel[x][y].getLSBBlue()){
+                        n += 1;
+                    }
+
+
+                }
+            //    System.out.println(n);
+            }
+            System.out.println(n);
+            while (generated.size() < n + 64)
+            {
+                Integer next = rng.nextInt(height*width *3) + 1;
+                // As we're adding to a set, this will automatically do a containment check
+                if(!generated.contains(next)){
+                    generated.add(next);
+                }
+            }
+            int charCount = 0;
+            int tempChar = 0;
+            String ret = "";
+            for(i=0;i<n;i++){
+
+
+                tempChar = tempChar<<1  ;
+                int randtemp = generated.get(gencon);
+                gencon++;
+                int x = (randtemp/3) / height;
+                int y = (randtemp/3) % height;
+                //if(i==0 || i==1) System.out.println(randtemp);
+                if(randtemp%3==0){
+                    if(MatPixel[x][y].getLSBRed()){
+                        tempChar += 1;
+                    }
+
+                }
+                else if(randtemp%3==1){
+                    if(MatPixel[x][y].getLSBGreen()){
+                        tempChar += 1;
+                    }
+                }
+                else{
+                    if(MatPixel[x][y].getLSBBlue()){
+                        tempChar += 1;  
+                    }
+                }
+                charCount++;
+                //ambil perbyte yaitu 8
+                if(charCount == 8 ){
+                     char a = (char) tempChar;
+                    charCount = 0;
+                    ret+=a;
+                    tempChar = 0;
+                }
+            }
+            return ret;
+        }
     }
     
     public void setKey(int k){
@@ -339,5 +468,13 @@ public class Stego {
             }
         }
         return a;
+    }
+    
+    public int getMaxSize(){
+        return height*width*3/1024;
+    }
+    
+    public int getTextSize(){
+        return (ht.getLength()/8)/1024;
     }
 }
