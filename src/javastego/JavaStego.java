@@ -62,14 +62,95 @@ public class JavaStego {
         Import(filename);
     }
     
-    int PixAr[];
+    public int setMark(int n, int level) {
+        int ans = n;
+        if(level==0 || level==1) { 
+            ans &= ~(1<<1);
+            if(level==0) ans &= ~1;
+            else ans |= 1;
+        }
+        else {
+            ans |= (1<<1);
+            if(level==3) ans &= ~1;
+            else ans |= 1;
+        }
+        return ans;
+    }
+    
+    public int getLevel(int d) {
+        int level;
+        if(d<=7) level = 0;
+        else if(d>=8 && d<=15) level = 1;
+        else if(d>=16 && d<=31) level = 2;
+        else level = 3;
+        return level;
+    }
+    
     public int Initialize() {
+        int PixArR[], PixArB[], PixArG[];
         int capacity=0;
         for(int row=0; row<height; row+=3) {
             for(int col=0; col<width; col+=3) {
-                if(row+3<height)
-                    PixAr = new int [9];
-                    int idx = 0;
+                if(row+3<height && col+3<width) {
+                    PixArR = new int [9];
+                    PixArG = new int [9];
+                    PixArB = new int [9]; //cuma ini yg dipake kalo grayscale
+                    
+                    int xminB = MatPixel[row][col] & 0x000000FF;
+                    int xminG = (MatPixel[row][col] >> 8) & 0x000000FF;
+                    int xminR = (MatPixel[row][col] >> 16) & 0x000000FF;
+                    int idx=0;
+                    
+                    for(int i=row; i<row+3; i++) {
+                        for(int j=col; j<col+3; j++) {
+                            PixArB[idx] = MatPixel[i][j] & 0x000000FF;
+                            PixArG[idx] = (MatPixel[i][j] >> 8) & 0x000000FF;
+                            PixArR[idx] = (MatPixel[i][j] >> 16) & 0x000000FF;      
+                            
+                            if(PixArB[idx]<xminB) xminB = PixArB[idx];
+                            if(PixArG[idx]<xminG) xminG = PixArG[idx];
+                            if(PixArR[idx]<xminR) xminR = PixArR[idx];
+                            idx++;
+                        }
+                    }
+                    
+                    int dB = 0, dG=0, dR=0;
+                    for(int i=0; i<9; i++) {
+                        dB += (PixArB[i] - xminB);
+                        dG += (PixArG[i] - xminG);
+                        dR += (PixArR[i] - xminR);
+                    }
+                    dB /= 8;
+                    dG /= 8;
+                    dR /= 8;
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    /*int idx = 0;
                     int xmin = MatPixel[row][col];
                     for(int i=row; i<row+3; i++) {
                         for(int j=col; j<col+3; j++) {
@@ -91,14 +172,16 @@ public class JavaStego {
                     if(d<=7) level = 0;
                     else if(d>=8 && d<=15) level = 1;
                     else if(d>=16 && d<=31) level = 2;
-                    else level = 3;
+                    else level = 3;*/
                     
                     //belum sisip bit tanda
                     //belum hitung kapasitas
+                }
             }
         }
         return capacity;
     }
+    
     
     public void Import(String filename) {
         BufferedImage buf = null;
